@@ -237,81 +237,100 @@ const Publications = ({ language }) => {
           // Add links for the first sixteen publications
           let link = null;
           if (idx === 0) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/74962/WOMEN-AND-MEN---2025.pdf"
-              : "https://www.geostat.ge/media/74961/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98---2025.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/74962/WOMEN-AND-MEN---2025.pdf"
+                : "https://www.geostat.ge/media/74961/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98---2025.pdf";
           } else if (idx === 1) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/67728/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98---2024_Eng.pdf"
-              : "https://www.geostat.ge/media/66675/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98-%E1%83%A1%E1%83%90%E1%83%A5%E1%83%90%E1%83%A0%E1%83%97%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%A8%E1%83%98_2024.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/67728/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98---2024_Eng.pdf"
+                : "https://www.geostat.ge/media/66675/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98-%E1%83%A1%E1%83%90%E1%83%A5%E1%83%90%E1%83%A0%E1%83%97%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%A8%E1%83%98_2024.pdf";
           } else if (idx === 2) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/58119/Women_And_Men_In_Georgia_2023_ENG.PDF"
-              : "https://www.geostat.ge/media/58118/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98_%E1%83%93%E1%83%90_%E1%83%99%E1%83%90%E1%83%AA%E1%83%98_%E1%83%A1%E1%83%90%E1%83%A5%E1%83%90%E1%83%A0%E1%83%97%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%A8%E1%83%98_2023.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/58119/Women_And_Men_In_Georgia_2023_ENG.PDF"
+                : "https://www.geostat.ge/media/58118/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98_%E1%83%93%E1%83%90_%E1%83%99%E1%83%90%E1%83%AA%E1%83%98_%E1%83%A1%E1%83%90%E1%83%A5%E1%83%90%E1%83%A0%E1%83%97%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%A8%E1%83%98_2023.pdf";
           } else if (idx === 3) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/51156/Women_And_Men_In_Georgia_2022_ENG.PDF"
-              : "https://www.geostat.ge/media/51155/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98_%E1%83%93%E1%83%90_%E1%83%99%E1%83%90%E1%83%AA%E1%83%98_%E1%83%A1%E1%83%90%E1%83%A5%E1%83%90%E1%83%A0%E1%83%97%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%A8%E1%83%98_2022.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/51156/Women_And_Men_In_Georgia_2022_ENG.PDF"
+                : "https://www.geostat.ge/media/51155/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98_%E1%83%93%E1%83%90_%E1%83%99%E1%83%90%E1%83%AA%E1%83%98_%E1%83%A1%E1%83%90%E1%83%A5%E1%83%90%E1%83%A0%E1%83%97%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%A8%E1%83%98_2022.pdf";
           } else if (idx === 4) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/59556/VAW-ENG-WEB4-2_28.12.pdf"
-              : "https://www.geostat.ge/media/59555/VAW-GEO-WEB4-3_28.12.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/59556/VAW-ENG-WEB4-2_28.12.pdf"
+                : "https://www.geostat.ge/media/59555/VAW-GEO-WEB4-3_28.12.pdf";
           } else if (idx === 5) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/59323/VAW_Results_GEO.PDF"
-              : "https://www.geostat.ge/media/59323/VAW_Results_GEO.PDF";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/59323/VAW_Results_GEO.PDF"
+                : "https://www.geostat.ge/media/59323/VAW_Results_GEO.PDF";
           } else if (idx === 6) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/50118/GTUS-Report-ENG.PDF"
-              : "https://www.geostat.ge/media/50117/GTUS-Report-GEO.PDF";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/50118/GTUS-Report-ENG.PDF"
+                : "https://www.geostat.ge/media/50117/GTUS-Report-GEO.PDF";
           } else if (idx === 7) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/pdf/User-Satisfaction-with-Gender-Statistics-Study-Report.pdf"
-              : "https://www.geostat.ge/pdf/momxmarebelTa_kmayofileba_genderuli_statistikiT-2021.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/pdf/User-Satisfaction-with-Gender-Statistics-Study-Report.pdf"
+                : "https://www.geostat.ge/pdf/momxmarebelTa_kmayofileba_genderuli_statistikiT-2021.pdf";
           } else if (idx === 8) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/38263/Women-and-Men-in-georgia%2C-2020.pdf"
-              : "https://www.geostat.ge/media/38262/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98%2C-2020.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/38263/Women-and-Men-in-georgia%2C-2020.pdf"
+                : "https://www.geostat.ge/media/38262/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98%2C-2020.pdf";
           } else if (idx === 9) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/27545/W%26M-GEO_2019.pdf"
-              : "https://www.geostat.ge/media/27546/W%26M-ENG_2019.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/27545/W%26M-GEO_2019.pdf"
+                : "https://www.geostat.ge/media/27546/W%26M-ENG_2019.pdf";
           } else if (idx === 10) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/41855/WOMEN-AND-MEN-IN-GEORGIAN_-2021.pdf"
-              : "https://www.geostat.ge/media/41854/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98-%E1%83%A1%E1%83%90%E1%83%A5%E1%83%90%E1%83%A0%E1%83%97%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%A8%E1%83%98_2021.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/41855/WOMEN-AND-MEN-IN-GEORGIAN_-2021.pdf"
+                : "https://www.geostat.ge/media/41854/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98-%E1%83%A1%E1%83%90%E1%83%A5%E1%83%90%E1%83%A0%E1%83%97%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%A8%E1%83%98_2021.pdf";
           } else if (idx === 11) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/21016/W%26M-in-ENG_2017.pdf"
-              : "https://www.geostat.ge/media/27454/W%26M-in-GEO_2017.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/21016/W%26M-in-ENG_2017.pdf"
+                : "https://www.geostat.ge/media/27454/W%26M-in-GEO_2017.pdf";
           } else if (idx === 12) {
-            link = language === "EN"
-              ? "https://gender.geostat.ge/gender/img/publicationspdf_en/National%20VAW%20Study%20Report%20ENG.pdf#view=fit"
-              : "https://www.geostat.ge/media/27454/W%26M-in-GEO_2017.pdf";
+            link =
+              language === "EN"
+                ? "https://gender.geostat.ge/gender/img/publicationspdf_en/National%20VAW%20Study%20Report%20ENG.pdf#view=fit"
+                : "https://www.geostat.ge/media/27454/W%26M-in-GEO_2017.pdf";
           } else if (idx === 13) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/21015/W%26M-ENG-2018.pdf"
-              : "https://www.geostat.ge/media/23369/WM_ge-2018.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/21015/W%26M-ENG-2018.pdf"
+                : "https://www.geostat.ge/media/23369/WM_ge-2018.pdf";
           } else if (idx === 14) {
-            link = language === "GE"
-              ? "https://gender.geostat.ge/gender/img/publicationspdf_en/EDGE-Report-ENG-Final.pdf#view=fit"
-              : "https://gender.geostat.ge/gender/img/publicationspdf/EDGE-Report-GEO-Final.pdf#view=fit";
+            link =
+              language === "GE"
+                ? "https://gender.geostat.ge/gender/img/publicationspdf_en/EDGE-Report-ENG-Final.pdf#view=fit"
+                : "https://gender.geostat.ge/gender/img/publicationspdf/EDGE-Report-GEO-Final.pdf#view=fit";
           } else if (idx === 15) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/21018/women-and-men-2013.pdf"
-              : "https://www.geostat.ge/media/13600/qali-da-kaci-2013.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/21018/women-and-men-2013.pdf"
+                : "https://www.geostat.ge/media/13600/qali-da-kaci-2013.pdf";
           } else if (idx === 16) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/21017/Women-and-Men_2015.pdf"
-              : "https://www.geostat.ge/media/13637/Qali-da-kaci_2015.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/21017/Women-and-Men_2015.pdf"
+                : "https://www.geostat.ge/media/13637/Qali-da-kaci_2015.pdf";
           } else if (idx === 17) {
-            link = language === "EN"
-              ? "https://www.geostat.ge/media/21014/Woman-and-Man-in-Georgia-2011.pdf"
-              : "https://www.geostat.ge/media/13581/qali-da-kaci.pdf";
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/21014/Woman-and-Man-in-Georgia-2011.pdf"
+                : "https://www.geostat.ge/media/13581/qali-da-kaci.pdf";
           } else if (idx === 18) {
-            link = language === "EN"
-              ? "https://gender.geostat.ge/gender/doc/GenderTradeAssessmentInGeorgia_en.pdf"
-              : "https://gender.geostat.ge/gender/doc/GenderTradeAssessmentInGeorgia_en.pdf";
+            link =
+              language === "EN"
+                ? "https://gender.geostat.ge/gender/doc/GenderTradeAssessmentInGeorgia_en.pdf"
+                : "https://gender.geostat.ge/gender/doc/GenderTradeAssessmentInGeorgia_en.pdf";
           }
           return (
             <div
@@ -397,7 +416,8 @@ const legislationData = [
     href: "https://matsne.gov.ge/ka/document/view/4613854?publication=4",
     titleGE:
       "ქალთა მიმართ ძალადობისა და ოჯახში ძალადობის პრევენციისა და აღკვეთის შესახებ ევროპის საბჭოს კონვენცია",
-    titleEN: "Council of Europe Convention on preventing and combating violence against women and domestic violence",
+    titleEN:
+      "Council of Europe Convention on preventing and combating violence against women and domestic violence",
   },
   {
     href: "https://matsne.gov.ge/ka/document/view/4936402?publication=0",
@@ -409,7 +429,8 @@ const legislationData = [
     href: "https://matsne.gov.ge/ka/document/view/5675992?publication=0",
     titleGE:
       "საქართველოს კანონი ქალთა მიმართ ძალადობის ან/და ოჯახში ძალადობის აღკვეთის, ძალადობის მსხვერპლთა დაცვისა და დახმარების შესახებ",
-    titleEN: "Law of Georgia on Elimination of Domestic Violence, Protection and Support of Victims of Domestic Violence",
+    titleEN:
+      "Law of Georgia on Elimination of Domestic Violence, Protection and Support of Victims of Domestic Violence",
   },
 ];
 
@@ -576,9 +597,7 @@ const Legislation = ({ language }) => {
                 lineHeight: "1.4",
               }}
             >
-              {language === "EN"
-                ? "Gender equality"
-                : "გენდერის დეპარტამენტი"}
+              {language === "EN" ? "Gender equality" : "გენდერის დეპარტამენტი"}
             </a>
             <hr style={hrStyle} />
 
@@ -596,7 +615,9 @@ const Legislation = ({ language }) => {
                       }}
                     />
                   </li>
-                  {i !== defenderItems.length - 1 ? <hr style={hrStyle} /> : null}
+                  {i !== defenderItems.length - 1 ? (
+                    <hr style={hrStyle} />
+                  ) : null}
                 </React.Fragment>
               ))}
             </ul>
@@ -741,7 +762,13 @@ const Links = ({ language }) => {
               {linksData.map((item, i) => (
                 <React.Fragment key={i}>
                   <li style={listItemStyle}>
-                    <div style={{ margin: "auto", display: "flex", alignItems: "center" }}>
+                    <div
+                      style={{
+                        margin: "auto",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
                       <img
                         src={item.img}
                         alt="logo"
