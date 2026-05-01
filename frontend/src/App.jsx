@@ -19,10 +19,24 @@ import AgriculturePage from "./pages/section/AgriculturePage";
 import OffencesPage from "./pages/section/OffencesPage";
 import GovernancePage from "./pages/section/GovernancePage";
 import SportPage from "./pages/section/SportPage";
+import SdgPage from "./pages/section/SdgPage";
 import "./App.scss";
 
 function App() {
-  const [language, setLanguage] = useState("GE");
+  // Persist language in localStorage
+  const getInitialLanguage = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('gender_language') || 'GE';
+    }
+    return 'GE';
+  };
+  const [language, setLanguageState] = useState(getInitialLanguage());
+  const setLanguage = (lang) => {
+    setLanguageState(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('gender_language', lang);
+    }
+  };
   const [glossaryOpen, setGlossaryOpen] = useState(false);
   const renderWithLayout = (content) => (
     <div
@@ -116,6 +130,10 @@ function App() {
           <Route
             path="/statistics/sport"
             element={renderWithLayout(<SportPage language={language} />)}
+          />
+          <Route
+            path="/goals/:goalId"
+            element={renderWithLayout(<SdgPage language={language} />)}
           />
           <Route
             path="/statistics/:section"

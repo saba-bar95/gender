@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
+import AboutGenderModal from "./AboutGenderModal";
 import sakstatLogoGe from "../assets/images/sakstat-logo.svg";
 import sakstatLogoEn from "../assets/images/sakstat-logo-en.png";
 import logo2 from "../assets/images/logo2.png";
@@ -22,6 +23,7 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
   const [statsOpen, setStatsOpen] = useState(false);
   const [mobileStatsOpen, setMobileStatsOpen] = useState(false);
   const [sdgHover, setSdgHover] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const langRef = useRef(null);
 
   const sections = [
@@ -79,6 +81,7 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
         "LEGISLATION",
         "LINKS",
         "GLOSSARY",
+        "ABOUT GENDER",
         "INFOGRAPHIC",
       ],
     },
@@ -98,6 +101,7 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
   };
 
   return (
+    <>
     <header className="w-full" style={{ fontFamily: "bpg-nino, sans-serif", fontFeatureSettings: '"case" on' }}>
       {/* TOP BAR */}
       <div style={{display: "flex", alignItems: "center", maxWidth: "1340px", margin: "0 auto", width: "100%" }}>
@@ -126,7 +130,7 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
                 alt="SDG"
                 onMouseEnter={() => setSdgHover(true)}
                 onMouseLeave={() => setSdgHover(false)}
-                style={{ width: "50%", verticalAlign: "middle" }}
+                style={{ width: "46%", verticalAlign: "middle" }}
               />
             </a>
           </div>
@@ -258,6 +262,9 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
                     onGlossaryOpen();
                     setMenuOpen(false);
                   } else if (idx === 5) {
+                    setAboutOpen(true);
+                    setMenuOpen(false);
+                  } else if (idx === 6) {
                     navigate("/infographic");
                     setMenuOpen(false);
                   } else {
@@ -330,6 +337,8 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
                   } else if (idx === 4) {
                     onGlossaryOpen();
                   } else if (idx === 5) {
+                    setAboutOpen(true);
+                  } else if (idx === 6) {
                     navigate("/infographic");
                   }
                 }}
@@ -342,6 +351,11 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
         </div>
       </nav>
     </header>
+
+    {aboutOpen && (
+      <AboutGenderModal language={language} onClose={() => setAboutOpen(false)} />
+    )}
+    </>
   );
 };
 

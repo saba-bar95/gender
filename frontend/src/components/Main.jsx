@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -37,53 +37,11 @@ const useWindowWidth = () => {
   return width;
 };
 
-const sdgTitlesKa = [
-  "სიღარიბის აღმოფხვრა",
-  "შიმშილის აღმოფხვრა",
-  "ჯანმრთელობა და კეთილდღეობა",
-  "ხარისხიანი განათლება",
-  "გენდერული თანასწორობა",
-  "სუფთა წყალი და სანიტარია",
-  "ხელმისაწვდომი და სუფთა ენერგია",
-  "ღირსეული სამუშაო და ეკონომიკური ზრდა",
-  "ინდუსტრია, ინოვაცია და ინფრასტრუქტურა",
-  "უთანასწორობის შემცირება",
-  "მდგრადი ქალაქები და თემები",
-  "პასუხისმგებლიანი მოხმარება და წარმოება",
-  "კლიმატის ცვლილება",
-  "წყლის ქვეშ სიცოცხლე",
-  "სიცოცხლე ხმელეთზე",
-  "მშვიდობა, მართლმსაჯულება და ძლიერი ინსტიტუტები",
-  "პარტნიორობა მიზნების მისაღწევად",
-];
-
-const sdgTitlesEn = [
-  "No Poverty",
-  "Zero Hunger",
-  "Good Health and Well-being",
-  "Quality Education",
-  "Gender Equality",
-  "Clean Water and Sanitation",
-  "Affordable and Clean Energy",
-  "Decent Work and Economic Growth",
-  "Industry, Innovation and Infrastructure",
-  "Reduced Inequalities",
-  "Sustainable Cities and Communities",
-  "Responsible Consumption and Production",
-  "Climate Action",
-  "Life Below Water",
-  "Life on Land",
-  "Peace, Justice and Strong Institutions",
-  "Partnerships for the Goals",
-];
 
 const SDGSection = ({ language }) => {
   const [hovered, setHovered] = React.useState(null);
-  const navigate = useNavigate();
   const isMobile = useWindowWidth() < 768;
   const images = language === "EN" ? sdgImagesEn : sdgImagesKa;
-  const titles = language === "EN" ? sdgTitlesEn : sdgTitlesKa;
-
   return (
     <div
       style={{
@@ -99,27 +57,30 @@ const SDGSection = ({ language }) => {
       }}
     >
       {Array.from({ length: 17 }, (_, i) => (
-        <div
+        <Link
           key={i}
-          onMouseEnter={() => setHovered(i)}
-          onMouseLeave={() => setHovered(null)}
-          onClick={() => navigate(`/goals/${i + 1}`)}
+          to={`/goals/${i + 1}`}
           style={{
             cursor: "pointer",
             borderRadius: "10px",
             overflow: "hidden",
+            display: "block",
             transform: hovered === i ? "scale(1.05)" : "scale(1)",
             transition: "transform 0.2s",
             boxShadow: hovered === i ? "0 4px 16px rgba(0,0,0,0.18)" : "none",
+            textDecoration: "none",
           }}
-          title={titles[i]}
+          // ...existing code...
+          title={``}
+          onMouseEnter={() => setHovered(i)}
+          onMouseLeave={() => setHovered(null)}
         >
           <img
             src={images[i + 1]}
-            alt={titles[i]}
+            alt="SDG Goal"
             style={{ width: "100%", height: "auto", display: "block" }}
           />
-        </div>
+        </Link>
       ))}
     </div>
   );
@@ -162,7 +123,6 @@ const SectionTitle = ({ title }) => (
         style={{ width: "163px", height: "12px" }}
       />
       <h2
-        className="font-semibold"
         style={{
           fontSize: "24px",
           color: "#e4535f",
@@ -884,62 +844,98 @@ const Hero = ({ language }) => {
   const isMobile = useWindowWidth() < 768;
   const swiperRef = useRef(null);
 
-  return (
-    <section className="w-full">
-      <div
-        className={`relative w-full overflow-hidden ${isMobile ? "h-[160px]" : "h-[300px]"}`}
-        style={{
-          boxShadow: "0 18px 50px rgba(0, 0, 0, 0.12)",
-        }}
-      >
-        <Swiper
-          modules={[Autoplay, Pagination]}
-          loop
-          onSwiper={(swiper) => {
-            swiperRef.current = swiper;
+    // PDF link paths for slides 1-6 (index 0-5)
+    const getPdfLink = (idx) => {
+      if (idx < 6) {
+        return language === "EN"
+          ? new URL(`../assets/img/genderinfographics_en/${idx + 1}.pdf`, import.meta.url).href
+          : new URL(`../assets/img/genderinfographics/${idx + 1}.pdf`, import.meta.url).href;
+      }
+      return null;
+    };
+
+    // Helper to scroll to SDG section
+    const scrollToSDG = () => {
+      const section = document.getElementById("sdg");
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+
+    return (
+      <section className="w-full">
+        <div
+          className={`relative w-full overflow-hidden ${isMobile ? "h-[160px]" : "h-[300px]"}`}
+          style={{
+            boxShadow: "0 18px 50px rgba(0, 0, 0, 0.12)",
           }}
-          pagination={{ clickable: true }}
-          autoplay={{ delay: 8000, disableOnInteraction: false }}
-          className="h-full w-full"
         >
-          {slides.map((slide, i) => (
-            <SwiperSlide key={i}>
-              <div
-                className="w-full h-full"
-                style={{
-                  backgroundImage: `url(${language === "EN" ? slide.srcEN : slide.srcGE})`,
-                  backgroundSize: "cover",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "center",
-                  backgroundColor: "transparent",
-                }}
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-
-        <div className="absolute inset-0 z-20 flex items-center justify-between px-12 md:px-20 pointer-events-none">
-          <button
-            type="button"
-            onClick={() => swiperRef.current?.slidePrev()}
-            className="flex h-10 w-10 items-center justify-center rounded-full cursor-pointer pointer-events-auto bg-[#8fd0ff] hover:bg-[#0066e0] text-white transition-colors duration-200"
-            aria-label={language === "EN" ? "Previous slide" : "წინა სლაიდი"}
+          <Swiper
+            modules={[Autoplay, Pagination]}
+            loop
+            onSwiper={(swiper) => {
+              swiperRef.current = swiper;
+            }}
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 8000, disableOnInteraction: false }}
+            className="h-full w-full"
           >
-            ‹
-          </button>
+            {slides.map((slide, i) => {
+              const pdfLink = getPdfLink(i);
+              const isSeventh = i === 6;
+              const slideContent = (
+                <div
+                  className="w-full h-full"
+                  style={{
+                    backgroundImage: `url(${language === "EN" ? slide.srcEN : slide.srcGE})`,
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center",
+                    backgroundColor: "transparent",
+                    cursor: pdfLink || isSeventh ? "pointer" : "default",
+                  }}
+                  title={
+                    pdfLink
+                      ? language === "EN" ? "Open PDF" : "გახსენი PDF"
+                      : isSeventh
+                      ? language === "EN" ? "Go to SDG section" : "გადადით SDG სექციაზე"
+                      : undefined
+                  }
+                  onClick={() => {
+                    if (pdfLink) {
+                      window.open(pdfLink, "_blank");
+                    } else if (isSeventh) {
+                      scrollToSDG();
+                    }
+                  }}
+                />
+              );
+              return <SwiperSlide key={i}>{slideContent}</SwiperSlide>;
+            })}
+          </Swiper>
 
-          <button
-            type="button"
-            onClick={() => swiperRef.current?.slideNext()}
-            className="flex h-10 w-10 items-center justify-center rounded-full cursor-pointer pointer-events-auto bg-[#8fd0ff] hover:bg-[#0066e0] text-white transition-colors duration-200"
-            aria-label={language === "EN" ? "Next slide" : "შემდეგი სლაიდი"}
-          >
-            ›
-          </button>
+          <div className="absolute inset-0 z-20 flex items-center justify-between px-12 md:px-20 pointer-events-none">
+            <button
+              type="button"
+              onClick={() => swiperRef.current?.slidePrev()}
+              className="flex h-10 w-10 items-center justify-center rounded-full cursor-pointer pointer-events-auto bg-[#8fd0ff] hover:bg-[#0066e0] text-white transition-colors duration-200"
+              aria-label={language === "EN" ? "Previous slide" : "წინა სლაიდი"}
+            >
+              ‹
+            </button>
+
+            <button
+              type="button"
+              onClick={() => swiperRef.current?.slideNext()}
+              className="flex h-10 w-10 items-center justify-center rounded-full cursor-pointer pointer-events-auto bg-[#8fd0ff] hover:bg-[#0066e0] text-white transition-colors duration-200"
+              aria-label={language === "EN" ? "Next slide" : "შემდეგი სლაიდი"}
+            >
+              ›
+            </button>
+          </div>
         </div>
-      </div>
-    </section>
-  );
+      </section>
+    );
 };
 
 const Main = ({ language = "GE" }) => {
@@ -984,12 +980,14 @@ const Main = ({ language = "GE" }) => {
           "links",
           "sdg",
         ];
+        // Publications (idx 1) and Links (idx 3) get gray background
+        const sectionBg = idx === 1 || idx === 3 ? { backgroundColor: "#f6f6f6" } : {};
         return (
           <section
             key={idx}
             id={sectionIds[idx]}
             className={`w-full ${idx === 1 ? "" : "py-10 px-6 md:px-16"}`}
-            style={{ borderBottom: "1px solid #e5e7eb" }}
+            style={{ borderBottom: "1px solid #e5e7eb", ...sectionBg }}
           >
             {idx === 1 ? (
               <Publications language={language} />
