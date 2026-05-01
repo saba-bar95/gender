@@ -848,8 +848,8 @@ const Hero = ({ language }) => {
     const getPdfLink = (idx) => {
       if (idx < 6) {
         return language === "EN"
-          ? new URL(`../assets/img/genderinfographics_en/${idx + 1}.pdf`, import.meta.url).href
-          : new URL(`../assets/img/genderinfographics/${idx + 1}.pdf`, import.meta.url).href;
+          ? new URL(`../assets/img/coverPdf_en/${idx + 1}.pdf`, import.meta.url).href
+          : new URL(`../assets/img/coverPdf/${idx + 1}.pdf`, import.meta.url).href;
       }
       return null;
     };

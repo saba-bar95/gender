@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import AboutGenderModal from "./AboutGenderModal";
+import InfographicModal from "./InfographicModal";
 import sakstatLogoGe from "../assets/images/sakstat-logo.svg";
 import sakstatLogoEn from "../assets/images/sakstat-logo-en.png";
 import logo2 from "../assets/images/logo2.png";
@@ -24,6 +25,7 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
   const [mobileStatsOpen, setMobileStatsOpen] = useState(false);
   const [sdgHover, setSdgHover] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [infographicOpen, setInfographicOpen] = useState(false);
   const langRef = useRef(null);
 
   const sections = [
@@ -265,7 +267,7 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
                     setAboutOpen(true);
                     setMenuOpen(false);
                   } else if (idx === 6) {
-                    navigate("/infographic");
+                    setInfographicOpen(true);
                     setMenuOpen(false);
                   } else {
                     setMenuOpen(false);
@@ -339,7 +341,7 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
                   } else if (idx === 5) {
                     setAboutOpen(true);
                   } else if (idx === 6) {
-                    navigate("/infographic");
+                    setInfographicOpen(true);
                   }
                 }}
                 className="flex items-center px-3 py-[20px] transition-colors duration-200 hover:bg-white hover:text-gray-900"
@@ -354,6 +356,10 @@ const Header = ({ language = "GE", setLanguage = () => {}, onGlossaryOpen = () =
 
     {aboutOpen && (
       <AboutGenderModal language={language} onClose={() => setAboutOpen(false)} />
+    )}
+
+    {infographicOpen && (
+      <InfographicModal language={language} onClose={() => setInfographicOpen(false)} />
     )}
     </>
   );
