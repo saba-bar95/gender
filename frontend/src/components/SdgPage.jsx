@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import arrLeft from "../../assets/img/new/arr-left.png";
-import arrRight from "../../assets/img/new/arr-right.png";
+import arrLeft from "../assets/img/new/arr-left.png";
+import arrRight from "../assets/img/new/arr-right.png";
 
 // Horizontal line style for SDG file entries
 const hrStyle = {
@@ -473,7 +473,7 @@ const SdgPage = ({ language = "GE" }) => {
         </div>
       ) : (
         <div className="space-y-1">
-          {files.map(({ key, file }, idx) => (
+          {files.map(({ key, file }) => (
             <React.Fragment key={key}>
               <div
                 className="p-1 bg-white flex items-center justify-between"
@@ -481,22 +481,22 @@ const SdgPage = ({ language = "GE" }) => {
               >
                 <span
                   onClick={() => {
-                    window.open(basePath + file, '_blank');
+                    window.open(basePath + file, "_blank");
                   }}
                   style={{
-                    whiteSpace: 'inherit',
-                    textAlign: 'justify',
-                    color: '#009ddc',
-                    width: '100%',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    transition: 'color 0.2s',
-                    fontFamily: 'myFont, sans-serif',
+                    whiteSpace: "inherit",
+                    textAlign: "justify",
+                    color: "#009ddc",
+                    width: "100%",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    transition: "color 0.2s",
+                    fontFamily: "myFont, sans-serif",
                   }}
-                  onMouseOver={e => (e.currentTarget.style.color = '#e4535f')}
-                  onMouseOut={e => (e.currentTarget.style.color = '#009ddc')}
-                  title={lang === 'EN' ? 'Download Excel' : 'გადმოწერა'}
+                  onMouseOver={(e) => (e.currentTarget.style.color = "#e4535f")}
+                  onMouseOut={(e) => (e.currentTarget.style.color = "#009ddc")}
+                  title={lang === "EN" ? "Download Excel" : "გადმოწერა"}
                 >
                   {SDG_LABELS[lang][key]}
                 </span>

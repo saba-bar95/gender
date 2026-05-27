@@ -10,6 +10,7 @@ import matsneLogo from "../assets/img/lnk/macne.png";
 import defenderLogo from "../assets/img/lnk/damcveli.png";
 import arrLeft from "../assets/img/new/arr-left.png";
 import arrRight from "../assets/img/new/arr-right.png";
+import { useGenderStatisticsSections } from "../hooks/useGenderStatisticsSections";
 
 // SDG goal images
 const sdgImagesKa = Object.fromEntries(
@@ -36,7 +37,6 @@ const useWindowWidth = () => {
   }, []);
   return width;
 };
-
 
 const SDGSection = ({ language }) => {
   const [hovered, setHovered] = React.useState(null);
@@ -784,31 +784,25 @@ const statCardImagesEn = {
 const StatCards = ({ language }) => {
   const [hoveredIndex, setHoveredIndex] = React.useState(null);
   const navigate = useNavigate();
-  const statCardRoutes = [
-    "/statistics/population",
-    "/statistics/health",
-    "/statistics/education",
-    "/statistics/social-protection",
-    "/statistics/households",
-    "/statistics/employment",
-    "/statistics/income-and-expenditure",
-    "/statistics/ict",
-    "/statistics/business-sector",
-    "/statistics/agriculture",
-    "/statistics/offences",
-    "/statistics/governance",
-    "/statistics/sport",
-  ];
+  const { sections, loading } = useGenderStatisticsSections();
+
+  if (loading) {
+    return (
+      <div className="mt-6 text-center text-gray-500" style={{ fontFamily: "myFont, sans-serif" }}>
+        {language === "EN" ? "Loading sections…" : "სექციები იტვირთება…"}
+      </div>
+    );
+  }
 
   return (
     <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-      {statCardRoutes.map((route, i) => (
+      {sections.map((section, i) => (
         <div
-          key={i}
+          key={section.id}
           className="flex flex-col items-center justify-center gap-4 rounded-2xl cursor-pointer"
           onMouseEnter={() => setHoveredIndex(i)}
           onMouseLeave={() => setHoveredIndex(null)}
-          onClick={() => route && navigate(route)}
+          onClick={() => navigate(`/statistics/${section.id}`)}
           style={{
             border:
               hoveredIndex === i ? "1px solid #0066e0" : "1px solid #e5e7eb",
@@ -844,98 +838,104 @@ const Hero = ({ language }) => {
   const isMobile = useWindowWidth() < 768;
   const swiperRef = useRef(null);
 
-    // PDF link paths for slides 1-6 (index 0-5)
-    const getPdfLink = (idx) => {
-      if (idx < 6) {
-        return language === "EN"
-          ? new URL(`../assets/img/coverPdf_en/${idx + 1}.pdf`, import.meta.url).href
-          : new URL(`../assets/img/coverPdf/${idx + 1}.pdf`, import.meta.url).href;
-      }
-      return null;
-    };
+  // PDF link paths for slides 1-6 (index 0-5)
+  const getPdfLink = (idx) => {
+    if (idx < 6) {
+      return language === "EN"
+        ? new URL(`../assets/img/coverPdf_en/${idx + 1}.pdf`, import.meta.url)
+            .href
+        : new URL(`../assets/img/coverPdf/${idx + 1}.pdf`, import.meta.url)
+            .href;
+    }
+    return null;
+  };
 
-    // Helper to scroll to SDG section
-    const scrollToSDG = () => {
-      const section = document.getElementById("sdg");
-      if (section) {
-        section.scrollIntoView({ behavior: "smooth" });
-      }
-    };
+  // Helper to scroll to SDG section
+  const scrollToSDG = () => {
+    const section = document.getElementById("sdg");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
-    return (
-      <section className="w-full">
-        <div
-          className={`relative w-full overflow-hidden ${isMobile ? "h-[160px]" : "h-[300px]"}`}
-          style={{
-            boxShadow: "0 18px 50px rgba(0, 0, 0, 0.12)",
+  return (
+    <section className="w-full">
+      <div
+        className={`relative w-full overflow-hidden ${isMobile ? "h-[160px]" : "h-[300px]"}`}
+        style={{
+          boxShadow: "0 18px 50px rgba(0, 0, 0, 0.12)",
+        }}
+      >
+        <Swiper
+          modules={[Autoplay, Pagination]}
+          loop
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
           }}
+          pagination={{ clickable: true }}
+          autoplay={{ delay: 8000, disableOnInteraction: false }}
+          className="h-full w-full"
         >
-          <Swiper
-            modules={[Autoplay, Pagination]}
-            loop
-            onSwiper={(swiper) => {
-              swiperRef.current = swiper;
-            }}
-            pagination={{ clickable: true }}
-            autoplay={{ delay: 8000, disableOnInteraction: false }}
-            className="h-full w-full"
-          >
-            {slides.map((slide, i) => {
-              const pdfLink = getPdfLink(i);
-              const isSeventh = i === 6;
-              const slideContent = (
-                <div
-                  className="w-full h-full"
-                  style={{
-                    backgroundImage: `url(${language === "EN" ? slide.srcEN : slide.srcGE})`,
-                    backgroundSize: "cover",
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "center",
-                    backgroundColor: "transparent",
-                    cursor: pdfLink || isSeventh ? "pointer" : "default",
-                  }}
-                  title={
-                    pdfLink
-                      ? language === "EN" ? "Open PDF" : "გახსენი PDF"
-                      : isSeventh
-                      ? language === "EN" ? "Go to SDG section" : "გადადით SDG სექციაზე"
+          {slides.map((slide, i) => {
+            const pdfLink = getPdfLink(i);
+            const isSeventh = i === 6;
+            const slideContent = (
+              <div
+                className="w-full h-full"
+                style={{
+                  backgroundImage: `url(${language === "EN" ? slide.srcEN : slide.srcGE})`,
+                  backgroundSize: "cover",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  backgroundColor: "transparent",
+                  cursor: pdfLink || isSeventh ? "pointer" : "default",
+                }}
+                title={
+                  pdfLink
+                    ? language === "EN"
+                      ? "Open PDF"
+                      : "გახსენი PDF"
+                    : isSeventh
+                      ? language === "EN"
+                        ? "Go to SDG section"
+                        : "გადადით SDG სექციაზე"
                       : undefined
+                }
+                onClick={() => {
+                  if (pdfLink) {
+                    window.open(pdfLink, "_blank");
+                  } else if (isSeventh) {
+                    scrollToSDG();
                   }
-                  onClick={() => {
-                    if (pdfLink) {
-                      window.open(pdfLink, "_blank");
-                    } else if (isSeventh) {
-                      scrollToSDG();
-                    }
-                  }}
-                />
-              );
-              return <SwiperSlide key={i}>{slideContent}</SwiperSlide>;
-            })}
-          </Swiper>
+                }}
+              />
+            );
+            return <SwiperSlide key={i}>{slideContent}</SwiperSlide>;
+          })}
+        </Swiper>
 
-          <div className="absolute inset-0 z-20 flex items-center justify-between px-12 md:px-20 pointer-events-none">
-            <button
-              type="button"
-              onClick={() => swiperRef.current?.slidePrev()}
-              className="flex h-10 w-10 items-center justify-center rounded-full cursor-pointer pointer-events-auto bg-[#8fd0ff] hover:bg-[#0066e0] text-white transition-colors duration-200"
-              aria-label={language === "EN" ? "Previous slide" : "წინა სლაიდი"}
-            >
-              ‹
-            </button>
+        <div className="absolute inset-0 z-20 flex items-center justify-between px-12 md:px-20 pointer-events-none">
+          <button
+            type="button"
+            onClick={() => swiperRef.current?.slidePrev()}
+            className="flex h-10 w-10 items-center justify-center rounded-full cursor-pointer pointer-events-auto bg-[#8fd0ff] hover:bg-[#0066e0] text-white transition-colors duration-200"
+            aria-label={language === "EN" ? "Previous slide" : "წინა სლაიდი"}
+          >
+            ‹
+          </button>
 
-            <button
-              type="button"
-              onClick={() => swiperRef.current?.slideNext()}
-              className="flex h-10 w-10 items-center justify-center rounded-full cursor-pointer pointer-events-auto bg-[#8fd0ff] hover:bg-[#0066e0] text-white transition-colors duration-200"
-              aria-label={language === "EN" ? "Next slide" : "შემდეგი სლაიდი"}
-            >
-              ›
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => swiperRef.current?.slideNext()}
+            className="flex h-10 w-10 items-center justify-center rounded-full cursor-pointer pointer-events-auto bg-[#8fd0ff] hover:bg-[#0066e0] text-white transition-colors duration-200"
+            aria-label={language === "EN" ? "Next slide" : "შემდეგი სლაიდი"}
+          >
+            ›
+          </button>
         </div>
-      </section>
-    );
+      </div>
+    </section>
+  );
 };
 
 const Main = ({ language = "GE" }) => {
@@ -981,7 +981,8 @@ const Main = ({ language = "GE" }) => {
           "sdg",
         ];
         // Publications (idx 1) and Links (idx 3) get gray background
-        const sectionBg = idx === 1 || idx === 3 ? { backgroundColor: "#f6f6f6" } : {};
+        const sectionBg =
+          idx === 1 || idx === 3 ? { backgroundColor: "#f6f6f6" } : {};
         return (
           <section
             key={idx}

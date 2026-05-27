@@ -1,0 +1,131 @@
+.dataset-chart-wrapper {
+  border: 1px solid #d9edf7;
+  border-radius: 10px;
+  background: #fcfeff;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.dataset-chart-wrapper .dlc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.dataset-chart-wrapper .dlc-right {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.dataset-chart-wrapper .dlc-accent {
+  width: 4px;
+  min-height: 44px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #009ddc 0%, #e4535f 100%);
+  margin-top: 2px;
+}
+
+.dataset-chart-wrapper .dlc-title-wrap h3 {
+  margin: 0;
+  color: #009ddc;
+  font-family: "bpg-nino", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.dataset-chart-wrapper .dlc-title-wrap p {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-family: "myFont", sans-serif;
+  font-size: 13px;
+}
+
+.dataset-chart-wrapper .chart-canvas {
+  margin-bottom: 10px;
+}
+
+.dataset-chart-wrapper .custom-tooltip {
+  border: 1px solid #d9edf7;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.97);
+  padding: 8px 10px;
+  min-width: 170px;
+  font-family: "myFont", sans-serif;
+}
+
+.dataset-chart-wrapper .tooltip-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dataset-chart-wrapper .tooltip-label {
+  margin: 0 0 3px;
+  color: #1f2937;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.dataset-chart-wrapper .text {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #374151;
+  font-size: 12px;
+}
+
+.dataset-chart-wrapper .before-span {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.dataset-chart-wrapper .value {
+  font-weight: 800;
+}
+
+.dataset-chart-wrapper .recharts-default-legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.dataset-chart-wrapper .recharts-legend-item {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 12px;
+  color: #374151;
+  font-family: "myFont", sans-serif;
+  user-select: none;
+}
+
+.dataset-chart-wrapper .recharts-legend-item-icon {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.dataset-chart-wrapper .empty-state {
+  border: 1px dashed #d9edf7;
+  border-radius: 8px;
+  padding: 14px;
+  color: #6b7280;
+  font-family: "myFont", sans-serif;
+  font-size: 14px;
+  text-align: center;
+  background: #fff;
+}
