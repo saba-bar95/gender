@@ -5,7 +5,6 @@ import Main from "./components/Main";
 import Footer from "./components/footer";
 import ErrorBoundary from "./components/ErrorBoundary";
 import GlossaryModal from "./components/GlossaryModal";
-import { StatisticsSectionRoute } from "./components/StatisticsSectionPage";
 import SdgPage from "./components/SdgPage";
 import "./App.scss";
 
@@ -80,7 +79,7 @@ function App() {
           <Route
             path="/statistics/:section"
             element={renderWithLayout(
-              <StatisticsSectionRoute language={language} />,
+              <Main language={language} setLanguage={setLanguage} />,
             )}
           />
           <Route

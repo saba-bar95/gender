@@ -1,7 +1,10 @@
-import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useGenderStatisticsSections } from "../hooks/useGenderStatisticsSections";
 import { useGenderStatisticsDatasets } from "../hooks/useGenderStatisticsDatasets";
 import { useGenderStatisticsDatasetChart } from "../hooks/useGenderStatisticsDatasetChart";
+import { downloadChartCsv } from "../utils/chartDownloads";
+import ChartSidebar from "./ChartSidebar";
 import DatasetLineChart from "./DatasetLineChart";
 
 const hrStyle = {
@@ -15,91 +18,130 @@ const hrStyle = {
 const datasetDisplayName = (dataset, language) =>
   language === "EN" ? dataset.englishName || dataset.name : dataset.name;
 
-const StatisticsSectionPage = ({ language = "GE", sectionId }) => {
-  const { sections, loading: sectionsLoading, error: sectionsError } =
-    useGenderStatisticsSections();
+const sectionDisplayName = (meta, language) =>
+  language === "EN" ? meta.englishName || meta.name : meta.name;
+
+const StatisticsSectionPage = ({
+  language = "GE",
+  sectionId,
+  embedded = false,
+}) => {
+  const navigate = useNavigate();
+  const {
+    sections,
+    loading: sectionsLoading,
+    error: sectionsError,
+  } = useGenderStatisticsSections();
+
   const {
     byGroup,
     loading: datasetsLoading,
     error: datasetsError,
   } = useGenderStatisticsDatasets(sectionId, language);
+
   const {
     selectedId,
     chartModel,
     loading: chartLoading,
+    filterLoading: chartFilterLoading,
     error: chartError,
+    chartFilters,
+    filterSelections,
     loadDataset,
+    updateFilter,
+    clearDataset,
   } = useGenderStatisticsDatasetChart(language);
 
   const meta = sections.find((s) => s.id === sectionId);
   const loading = sectionsLoading || datasetsLoading;
+  const [chartType, setChartType] = useState("line");
+
+  const panel = (children) => (
+    <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-sm p-8">
+      {children}
+    </div>
+  );
+
+  const wrap = (children) => {
+    if (embedded) {
+      return <div className="mt-2">{children}</div>;
+    }
+    return (
+      <div className="px-6 md:px-16 py-10" style={{ backgroundColor: "#f6f6f6" }}>
+        {children}
+      </div>
+    );
+  };
 
   if (loading) {
-    return (
-      <div className="px-6 md:px-16 py-10">
-        <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-sm p-8">
-          <p
-            className="text-gray-500"
-            style={{ fontFamily: "myFont, sans-serif" }}
-          >
-            {language === "EN" ? "Loading…" : "იტვირთება…"}
-          </p>
-        </div>
-      </div>
+    return wrap(
+      panel(
+        <p
+          className="text-gray-500"
+          style={{ fontFamily: "myFont, sans-serif" }}
+        >
+          {language === "EN" ? "Loading…" : "იტვირთება…"}
+        </p>,
+      ),
     );
   }
 
   if (sectionsError || datasetsError || !meta) {
-    return (
-      <div className="px-6 md:px-16 py-10">
-        <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-sm p-8">
+    return wrap(
+      panel(
+        <>
           <h1 className="text-2xl font-semibold text-[#e4535f] mb-4">
             {language === "EN" ? "Section not found" : "სექცია ვერ მოიძებნა"}
           </h1>
-          <Link to="/" className="text-[#337ab7] underline">
-            {language === "EN" ? "Back to home" : "მთავარ გვერდზე დაბრუნება"}
+          <Link to="/#statistics" className="text-[#337ab7] underline">
+            {language === "EN" ? "Back to sections" : "სექციებზე დაბრუნება"}
           </Link>
-        </div>
-      </div>
+        </>,
+      ),
     );
   }
 
-  const title = language === "EN" ? meta.en : meta.ge;
-  const description =
-    language === "EN" ? meta.descriptionEn : meta.descriptionGe;
   const groupEntries = byGroup ? Object.entries(byGroup) : [];
 
-  return (
-    <div className="px-6 md:px-16 py-10" style={{ backgroundColor: "#f6f6f6" }}>
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-sm p-8">
-        <h1
-          className="text-3xl font-semibold mb-4"
-          style={{ color: "#e4535f", fontFamily: "bpg-nino, sans-serif" }}
-        >
-          {title}
-        </h1>
-        {description ? (
-          <p
-            className="text-gray-600 mb-8"
+  return wrap(
+    <>
+      {embedded ? (
+        <div className="max-w-6xl mx-auto mb-4 flex flex-wrap items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => navigate("/#statistics")}
+            className="text-sm text-[#337ab7] hover:text-[#009ddc] underline cursor-pointer"
             style={{ fontFamily: "myFont, sans-serif" }}
           >
-            {description}
-          </p>
-        ) : null}
-
-        {groupEntries.length === 0 ? (
-          <p className="text-gray-500" style={{ fontFamily: "myFont, sans-serif" }}>
-            {language === "EN" ? "No datasets found." : "მონაცემები ვერ მოიძებნა."}
+            {language === "EN" ? "← Back to sections" : "← სექციებზე დაბრუნება"}
+          </button>
+          <h3
+            className="text-base font-semibold text-[#009ddc]"
+            style={{ fontFamily: "myFont, sans-serif" }}
+          >
+            {sectionDisplayName(meta, language)}
+          </h3>
+        </div>
+      ) : null}
+      {panel(
+        groupEntries.length === 0 ? (
+          <p
+            className="text-gray-500"
+            style={{ fontFamily: "myFont, sans-serif" }}
+          >
+            {language === "EN"
+              ? "No datasets found."
+              : "მონაცემები ვერ მოიძებნა."}
           </p>
         ) : (
           <div className="space-y-8">
             {groupEntries.map(([groupName, items]) => (
               <section key={groupName}>
                 <h2
-                  className="text-xl font-semibold mb-3"
+                  className="text-lg font-bold mb-3"
                   style={{
-                    color: "#009ddc",
-                    fontFamily: "bpg-nino, sans-serif",
+                    color: "#35bb40",
+                    fontFamily: "myFont, sans-serif",
                   }}
                 >
                   {groupName}
@@ -111,11 +153,36 @@ const StatisticsSectionPage = ({ language = "GE", sectionId }) => {
 
                     return (
                       <li key={dataset.id}>
-                        <div className="flex flex-wrap items-baseline justify-between gap-2 py-2">
+                        <div
+                          className="flex flex-wrap items-baseline justify-between gap-2 py-2 px-2 rounded cursor-pointer"
+                          onClick={() => {
+                            if (isSelected) {
+                              clearDataset();
+                              return;
+                            }
+                            setChartType("line");
+                            loadDataset(dataset.id);
+                          }}
+                          style={{
+                            border: isSelected
+                              ? "1px solid #000"
+                              : "1px solid transparent",
+                            backgroundColor: isSelected
+                              ? "#e6e6e6"
+                              : "transparent",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isSelected)
+                              e.currentTarget.style.backgroundColor = "#e6e6e6";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isSelected)
+                              e.currentTarget.style.backgroundColor =
+                                "transparent";
+                          }}
+                        >
                           <div className="flex-1 min-w-[200px] text-sm">
-                            <button
-                              type="button"
-                              onClick={() => loadDataset(dataset.id)}
+                            <span
                               className={`text-left transition-colors hover:text-[#e4535f] ${
                                 isSelected
                                   ? "text-[#e4535f] font-semibold"
@@ -124,26 +191,20 @@ const StatisticsSectionPage = ({ language = "GE", sectionId }) => {
                               style={{ fontFamily: "myFont, sans-serif" }}
                             >
                               {label}
-                            </button>
-                          </div>
-                          {dataset.unit ? (
-                            <span
-                              className="text-sm text-gray-500 shrink-0"
-                              style={{ fontFamily: "myFont, sans-serif" }}
-                            >
-                              {language === "EN" ? "Unit: " : "საზომი ერთეული: "}
-                              {dataset.unit}
+                              {dataset.unit ? ` (${dataset.unit})` : ""}
                             </span>
-                          ) : null}
+                          </div>
                         </div>
                         {isSelected ? (
-                          <div className="my-3 rounded-lg border border-[#d9edf7] bg-[#fafcff] p-4">
-                            {chartLoading ? (
+                          <div className="my-3">
+                            {chartLoading && !chartModel ? (
                               <p
                                 className="text-gray-500 text-sm"
                                 style={{ fontFamily: "myFont, sans-serif" }}
                               >
-                                {language === "EN" ? "Loading chart…" : "გრაფიკი იტვირთება…"}
+                                {language === "EN"
+                                  ? "Loading chart…"
+                                  : "გრაფიკი იტვირთება…"}
                               </p>
                             ) : null}
                             {chartError ? (
@@ -157,7 +218,47 @@ const StatisticsSectionPage = ({ language = "GE", sectionId }) => {
                               </p>
                             ) : null}
                             {chartModel && !chartLoading ? (
-                              <DatasetLineChart chartModel={chartModel} language={language} />
+                              <div
+                                className={`statistics-chart-row${chartFilterLoading ? " statistics-chart-row--updating" : ""}`}
+                              >
+                                <div className="statistics-chart-main">
+                                  {chartFilterLoading ? (
+                                    <div
+                                      className="statistics-chart-update-overlay"
+                                      aria-hidden
+                                    />
+                                  ) : null}
+                                  <DatasetLineChart
+                                    chartModel={chartModel}
+                                    language={language}
+                                    chartType={chartType}
+                                    displayTitle={`${label}${dataset.unit ? ` (${dataset.unit})` : ""}`}
+                                  />
+                                </div>
+                                <ChartSidebar
+                                  sectionId={sectionId}
+                                  groupName={groupName}
+                                  pxwebUrl={dataset.pxwebUrl}
+                                  chartType={chartType}
+                                  onChartTypeChange={setChartType}
+                                  chartFilters={chartFilters}
+                                  filterSelections={filterSelections}
+                                  onFilterChange={updateFilter}
+                                  onDownloadCsv={() => {
+                                    const chartTitle = `${label}${dataset.unit ? ` (${dataset.unit})` : ""}`;
+                                    downloadChartCsv(
+                                      chartModel.chartData.filter(
+                                        (row) =>
+                                          typeof row.year === "number" &&
+                                          row.year >= 2000,
+                                      ),
+                                      chartModel.seriesKeys,
+                                      chartModel.yearLabel,
+                                      chartTitle,
+                                    );
+                                  }}
+                                />
+                              </div>
                             ) : null}
                           </div>
                         ) : null}
@@ -169,13 +270,13 @@ const StatisticsSectionPage = ({ language = "GE", sectionId }) => {
               </section>
             ))}
           </div>
-        )}
-      </div>
-    </div>
+        ),
+      )}
+    </>,
   );
 };
 
-/** Remounts section page when route or language changes so dataset fetch restarts cleanly. */
+/** Standalone section view (home embed uses Main + embedded StatisticsSectionPage). */
 export function StatisticsSectionRoute({ language }) {
   const { section } = useParams();
   return (
@@ -183,6 +284,7 @@ export function StatisticsSectionRoute({ language }) {
       key={`${section}-${language}`}
       language={language}
       sectionId={section}
+      embedded={false}
     />
   );
 }

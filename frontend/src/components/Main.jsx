@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate, Link, useParams } from "react-router-dom";
+import StatisticsSectionPage from "./StatisticsSectionPage";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -940,6 +941,7 @@ const Hero = ({ language }) => {
 
 const Main = ({ language = "GE" }) => {
   const location = useLocation();
+  const { section: statisticsSectionId } = useParams();
   const txt = t[language] ?? t.GE;
 
   useEffect(() => {
@@ -954,6 +956,16 @@ const Main = ({ language = "GE" }) => {
 
     return () => clearTimeout(timer);
   }, [location.hash]);
+
+  useEffect(() => {
+    if (!statisticsSectionId) return;
+    const timer = setTimeout(() => {
+      document
+        .getElementById("statistics")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [statisticsSectionId, language]);
 
   return (
     <main
@@ -996,7 +1008,16 @@ const Main = ({ language = "GE" }) => {
               <>
                 <SectionTitle title={title} />
                 {idx === 0 ? (
-                  <StatCards language={language} />
+                  statisticsSectionId ? (
+                    <StatisticsSectionPage
+                      key={`${statisticsSectionId}-${language}`}
+                      language={language}
+                      sectionId={statisticsSectionId}
+                      embedded
+                    />
+                  ) : (
+                    <StatCards language={language} />
+                  )
                 ) : idx === 2 ? (
                   <Legislation language={language} />
                 ) : idx === 3 ? (
