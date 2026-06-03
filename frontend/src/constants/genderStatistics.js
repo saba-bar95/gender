@@ -22,10 +22,19 @@ export const buildGenderStatisticsDatasetsUrl = (subcategoryId, language) => {
 export const GENDER_STATISTICS_DATASET_API_BASE =
   "https://pcaxis-api.geostat.ge/api/datasets";
 
-/** @param {string} datasetId */
-export const buildDatasetDataUrl = (datasetId, language) => {
+/**
+ * @param {string} datasetId
+ * @param {string} language
+ * @param {string} [filterQuery] - Pre-encoded filter query (no leading ? or &)
+ */
+export const buildDatasetDataUrl = (datasetId, language, filterQuery = "") => {
+  const parts = [filterQuery].filter(Boolean);
+  if (language === "EN") {
+    parts.push("lang=en");
+  }
+  const query = parts.join("&");
   const base = `${GENDER_STATISTICS_DATASET_API_BASE}/${datasetId}/data`;
-  return language === "EN" ? `${base}?lang=en` : base;
+  return query ? `${base}?${query}` : base;
 };
 
 /** @param {string} datasetId */

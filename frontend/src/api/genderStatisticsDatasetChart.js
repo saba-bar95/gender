@@ -2,6 +2,7 @@ import {
   buildDatasetDataUrl,
   buildDatasetMetadataUrl,
 } from "../constants/genderStatistics";
+import { buildDatasetFilterQueryString } from "../utils/datasetFilters";
 
 async function fetchJson(url) {
   const response = await fetch(url);
@@ -18,9 +19,20 @@ async function fetchJson(url) {
 /**
  * @param {string} datasetId
  * @param {string} language - App language: "GE" | "EN"
+ * @param {import("../utils/datasetFilters").DatasetFilterVariable[]} [filterVariables]
+ * @param {Record<string, string>} [selections]
  */
-export function fetchDatasetData(datasetId, language) {
-  return fetchJson(buildDatasetDataUrl(datasetId, language));
+export function fetchDatasetData(
+  datasetId,
+  language,
+  filterVariables = [],
+  selections = {},
+) {
+  const filterQuery = buildDatasetFilterQueryString(
+    filterVariables,
+    selections,
+  );
+  return fetchJson(buildDatasetDataUrl(datasetId, language, filterQuery));
 }
 
 /**
@@ -34,10 +46,17 @@ export function fetchDatasetMetadata(datasetId, language) {
 /**
  * @param {string} datasetId
  * @param {string} language
+ * @param {import("../utils/datasetFilters").DatasetFilterVariable[]} [filterVariables]
+ * @param {Record<string, string>} [selections]
  */
-export async function fetchDatasetChartPayload(datasetId, language) {
+export async function fetchDatasetChartPayload(
+  datasetId,
+  language,
+  filterVariables = [],
+  selections = {},
+) {
   const [data, metadata] = await Promise.all([
-    fetchDatasetData(datasetId, language),
+    fetchDatasetData(datasetId, language, filterVariables, selections),
     fetchDatasetMetadata(datasetId, language),
   ]);
   return { data, metadata };

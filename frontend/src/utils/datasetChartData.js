@@ -1,3 +1,5 @@
+import { getFilterDimensionCodes } from "./datasetFilters";
+
 const YEAR_KEYS = ["year", "Year", "წელი"];
 
 /**
@@ -12,25 +14,37 @@ const getYearFromRow = (row) => {
   return null;
 };
 
+const isDimensionColumn = (key, dimensionSet) => {
+  if (YEAR_KEYS.includes(key)) return true;
+  const lower = key.toLowerCase();
+  return dimensionSet.has(key) || dimensionSet.has(lower);
+};
+
 /**
- * Series keys = category columns (exclude year / dimension keys).
+ * Series keys = value columns in each row (exclude year / PX dimension codes).
  * @param {Record<string, unknown>[]} rows
  * @param {string[]} categories
  * @param {string[]} dimensions
  */
 const resolveSeriesKeys = (rows, categories, dimensions) => {
-  if (categories?.length) return categories;
+  const sample = rows[0];
+  if (!sample) return [];
 
   const dimensionSet = new Set([
-    ...YEAR_KEYS,
     ...(dimensions ?? []).map((d) => d.toLowerCase()),
     ...(dimensions ?? []),
   ]);
 
-  const sample = rows[0];
-  if (!sample) return [];
+  const keysFromRows = Object.keys(sample).filter(
+    (key) => !isDimensionColumn(key, dimensionSet),
+  );
 
-  return Object.keys(sample).filter((key) => !dimensionSet.has(key));
+  if (categories?.length) {
+    const present = categories.filter((cat) => cat in sample);
+    if (present.length) return present;
+  }
+
+  return keysFromRows;
 };
 
 /**
@@ -39,7 +53,11 @@ const resolveSeriesKeys = (rows, categories, dimensions) => {
 export function buildChartModelFromPayload({ data, metadata }) {
   const rows = Array.isArray(data?.data) ? data.data : [];
   const categories = Array.isArray(data?.categories) ? data.categories : [];
-  const dimensions = Array.isArray(data?.dimensions) ? data.dimensions : [];
+  const apiDimensions = Array.isArray(data?.dimensions) ? data.dimensions : [];
+  const filterCodes = getFilterDimensionCodes(
+    metadata?.metadata?.variables ?? [],
+  );
+  const dimensions = [...new Set([...apiDimensions, ...filterCodes])];
   const seriesKeys = resolveSeriesKeys(rows, categories, dimensions);
 
   const byYear = new Map();
