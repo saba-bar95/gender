@@ -3,48 +3,107 @@
   border-radius: 10px;
   background: #fcfeff;
   padding: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  transition: opacity 0.2s ease;
 }
 
 .dataset-chart-wrapper .dlc-header {
+  position: relative;
+  z-index: 30;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
   margin-bottom: 12px;
 }
 
-.dataset-chart-wrapper .dlc-right {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
+.dataset-chart-wrapper .dlc-menu-wrap {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  z-index: 40;
+  transform: translateY(-50%);
 }
 
-.dataset-chart-wrapper .dlc-accent {
-  width: 4px;
-  min-height: 44px;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #009ddc 0%, #e4535f 100%);
-  margin-top: 2px;
+.dataset-chart-wrapper .dlc-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background: #fff;
+  color: rgb(51, 51, 51);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+}
+
+.dataset-chart-wrapper .dlc-menu-icon {
+  display: block;
+}
+
+.dataset-chart-wrapper .dlc-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  left: auto;
+  z-index: 50;
+  min-width: 210px;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dataset-chart-wrapper .dlc-menu-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: rgb(51, 51, 51);
+  font-family: "myFont", sans-serif;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+}
+
+.dataset-chart-wrapper .dlc-title-wrap {
+  max-width: calc(100% - 56px);
+  text-align: center;
 }
 
 .dataset-chart-wrapper .dlc-title-wrap h3 {
   margin: 0;
-  color: #009ddc;
-  font-family: "bpg-nino", sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.dataset-chart-wrapper .dlc-title-wrap p {
-  margin: 4px 0 0;
-  color: #6b7280;
+  color: rgb(51, 51, 51);
   font-family: "myFont", sans-serif;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .dataset-chart-wrapper .chart-canvas {
-  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 16px;
+}
+
+.dataset-chart-wrapper .dataset-chart-svg {
+  min-width: 0;
+  max-width: 100%;
+  background: #fff;
 }
 
 .dataset-chart-wrapper .custom-tooltip {
@@ -85,6 +144,16 @@
   border-radius: 2px;
   display: inline-block;
   margin-right: 6px;
+  vertical-align: middle;
+}
+
+.dataset-chart-wrapper .tooltip-marker-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  vertical-align: middle;
+  object-fit: contain;
+  display: inline-block;
 }
 
 .dataset-chart-wrapper .value {
@@ -92,11 +161,12 @@
 }
 
 .dataset-chart-wrapper .recharts-default-legend {
-  margin: 0;
+  margin: 2px 0 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px 14px;
 }
 
@@ -119,8 +189,16 @@
   flex-shrink: 0;
 }
 
+.dataset-chart-wrapper .recharts-legend-item-icon-img {
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  object-fit: contain;
+  display: block;
+}
+
 .dataset-chart-wrapper .empty-state {
-  border: 1px dashed #d9edf7;
   border-radius: 8px;
   padding: 14px;
   color: #6b7280;

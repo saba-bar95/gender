@@ -1,29 +1,212 @@
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import maleIcon from "../assets/charts/male.png";
+import femaleIcon from "../assets/charts/female.png";
+import totalIcon from "../assets/charts/total.png";
+import {
+  downloadChartPdf,
+  downloadChartPng,
+  downloadChartXls,
+} from "../utils/chartDownloads";
 import "./DatasetLineChart.scss";
 
-const SERIES_COLORS = [
-  "#e4535f",
-  "#009ddc",
-  "#6b7280",
-  "#10b981",
-  "#f59e0b",
-  "#8b5cf6",
-];
+const SERIES_FALLBACK_COLORS = ["#6b7280", "#10b981", "#f59e0b", "#8b5cf6"];
+
+const SERIES_COLORS_BY_TYPE = {
+  male: "rgb(0, 164, 223)",
+  female: "rgb(241, 119, 59)",
+  total: "rgb(52, 181, 90)",
+};
 
 const CHART_WIDTH = 960;
-const CHART_HEIGHT = 380;
-const PADDING = { top: 18, right: 18, bottom: 40, left: 58 };
+const CHART_HEIGHT = 400;
+const PADDING = { top: 14, right: 10, bottom: 62, left: 48 };
+const X_AXIS_INSET = 18;
+const X_LABEL_GAP = 12;
+const MIN_DISPLAY_YEAR = 2000;
+const MARKER_SIZE = 14;
+const MARKER_SIZE_HOVER = 18;
 
-const toNumber = (value) => (typeof value === "number" && !Number.isNaN(value) ? value : null);
+const SERIES_MARKER_ICONS = {
+  male: maleIcon,
+  female: femaleIcon,
+  total: totalIcon,
+};
+
+/** @param {string} key */
+const getSeriesMarkerType = (key) => {
+  const s = key.toLowerCase();
+  if (/ქალი|female|woman|women|girl/.test(s)) return "female";
+  if (/კაც|male|\bman\b|\bmen\b|boy/.test(s)) return "male";
+  if (/total|სულ|ჯამ/.test(s)) return "total";
+  return null;
+};
+
+/** @param {string} key */
+const getSeriesMarkerIcon = (key) => {
+  const type = getSeriesMarkerType(key);
+  return type ? SERIES_MARKER_ICONS[type] : null;
+};
+
+/** @param {string} key @param {number} [fallbackIndex] */
+const getSeriesColor = (key, fallbackIndex = 0) => {
+  const type = getSeriesMarkerType(key);
+  if (type && SERIES_COLORS_BY_TYPE[type]) return SERIES_COLORS_BY_TYPE[type];
+  return SERIES_FALLBACK_COLORS[fallbackIndex % SERIES_FALLBACK_COLORS.length];
+};
+
+const toNumber = (value) =>
+  typeof value === "number" && !Number.isNaN(value) ? value : null;
 const formatYear = (value) => String(value ?? "");
-const formatValue = (value) => (typeof value === "number" ? value.toLocaleString() : "—");
+const formatValue = (value) =>
+  typeof value === "number" ? value.toLocaleString() : "—";
+const formatAxisNumber = (value) =>
+  Math.round(value).toLocaleString(undefined, { maximumFractionDigits: 0 });
 
-const makePath = (points) => {
-  const valid = points.filter((p) => p.y !== null);
-  if (!valid.length) return "";
-  return valid
-    .map((p, index) => `${index === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
-    .join(" ");
+/** @param {number} roughStep */
+const niceStep = (roughStep) => {
+  if (!Number.isFinite(roughStep) || roughStep <= 0) return 1;
+  const magnitude = 10 ** Math.floor(Math.log10(roughStep));
+  const normalized = roughStep / magnitude;
+  if (normalized <= 1) return magnitude;
+  if (normalized <= 2) return 2 * magnitude;
+  if (normalized <= 5) return 5 * magnitude;
+  return 10 * magnitude;
+};
+
+/**
+ * Rounded Y scale that hugs the data (e.g. 1000, 2000, 5000) with integer ticks only.
+ * @param {number} dataMin
+ * @param {number} dataMax
+ * @param {number} [targetTickCount]
+ */
+const computeYAxisScale = (dataMin, dataMax, targetTickCount = 5) => {
+  if (dataMin === dataMax) {
+    const pad = dataMin === 0 ? 1 : Math.max(Math.abs(dataMin) * 0.1, 1);
+    return computeYAxisScale(dataMin - pad, dataMax + pad, targetTickCount);
+  }
+
+  const rawRange = dataMax - dataMin;
+  const step = niceStep(rawRange / Math.max(targetTickCount - 1, 1));
+  let scaleMin = Math.floor(dataMin / step) * step;
+  let scaleMax = Math.ceil(dataMax / step) * step;
+
+  if (scaleMax <= scaleMin) scaleMax = scaleMin + step;
+
+  const ticks = [];
+  for (let v = scaleMin; v <= scaleMax + step * 0.001; v += step) {
+    ticks.push(Math.round(v * 1e6) / 1e6);
+  }
+
+  return { min: scaleMin, max: scaleMax, ticks, step };
+};
+
+const ChartHeader = ({
+  displayTitle,
+  language,
+  showDownloads,
+  onDownloadPng,
+  onDownloadPdf,
+  onDownloadXls,
+}) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
+  const labels =
+    language === "EN"
+      ? {
+          png: "Download PNG image",
+          pdf: "Download PDF document",
+          xls: "Download xls",
+        }
+      : {
+          png: "PNG სურათის გადმოწერა",
+          pdf: "PDF დოკუმენტის გადმოწერა",
+          xls: "xls გადმოწერა",
+        };
+
+  return (
+    <div className="dlc-header">
+      <div className="dlc-title-wrap">
+        <h3>{displayTitle}</h3>
+      </div>
+      {showDownloads ? (
+        <div className="dlc-menu-wrap" ref={menuRef}>
+          <button
+            type="button"
+            className="dlc-menu-btn"
+            aria-label={
+              language === "EN" ? "Download options" : "გადმოწერის ვარიანტები"
+            }
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <svg
+              className="dlc-menu-icon"
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              aria-hidden="true"
+            >
+              <rect y="1" width="14" height="2" rx="1" fill="currentColor" />
+              <rect y="6" width="14" height="2" rx="1" fill="currentColor" />
+              <rect y="11" width="14" height="2" rx="1" fill="currentColor" />
+            </svg>
+          </button>
+          {menuOpen ? (
+            <ul className="dlc-menu-dropdown">
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onDownloadPng();
+                  }}
+                >
+                  {labels.png}
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onDownloadPdf();
+                  }}
+                >
+                  {labels.pdf}
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onDownloadXls();
+                  }}
+                >
+                  {labels.xls}
+                </button>
+              </li>
+            </ul>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
 };
 
 /**
@@ -36,26 +219,52 @@ const makePath = (points) => {
  *     yearLabel: string;
  *   };
  *   language: string;
+ *   displayTitle?: string;
+ *   chartType?: "line" | "bar";
  * }} props
  */
-const DatasetLineChart = ({ chartModel, language }) => {
+const DatasetLineChart = ({
+  chartModel,
+  language,
+  displayTitle,
+  chartType = "line",
+}) => {
   const { title, unit, seriesKeys, chartData, yearLabel } = chartModel;
+  const pointsWithYear = chartData.filter(
+    (row) => typeof row.year === "number",
+  );
+  const recentPoints = pointsWithYear.filter(
+    (row) => row.year >= MIN_DISPLAY_YEAR,
+  );
+  const displayChartData =
+    recentPoints.length > 0 ? recentPoints : pointsWithYear;
+  const chartTitle = displayTitle ?? (unit ? `${title} (${unit})` : title);
+  const svgRef = useRef(null);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [visibleLines, setVisibleLines] = useState(
     Object.fromEntries(seriesKeys.map((key) => [key, true])),
   );
 
-  if (!chartData.length || !seriesKeys.length) {
+  const handleDownloadPng = () => {
+    if (svgRef.current) downloadChartPng(svgRef.current, chartTitle);
+  };
+
+  const handleDownloadPdf = () => {
+    if (svgRef.current) downloadChartPdf(svgRef.current, chartTitle);
+  };
+
+  const handleDownloadXls = () => {
+    downloadChartXls(displayChartData, seriesKeys, yearLabel, chartTitle);
+  };
+
+  if (!displayChartData.length || !seriesKeys.length) {
     return (
       <div className="chart-wrapper dataset-chart-wrapper">
-        <div className="dlc-header">
-          <div className="dlc-right">
-            <div className="dlc-accent" />
-            <div className="dlc-title-wrap">
-              <h3>{unit ? `${title} (${unit})` : title}</h3>
-            </div>
-          </div>
-        </div>
+        <ChartHeader
+          displayTitle={chartTitle}
+          language={language}
+          showDownloads={false}
+        />
         <div className="empty-state">
           {language === "EN"
             ? "No chart data available for this indicator."
@@ -65,63 +274,98 @@ const DatasetLineChart = ({ chartModel, language }) => {
     );
   }
 
-  const years = chartData.map((d) => d.year).filter((year) => typeof year === "number");
+  const years = displayChartData
+    .map((d) => d.year)
+    .filter((year) => typeof year === "number");
   const minYear = Math.min(...years);
   const maxYear = Math.max(...years);
 
-  const allValues = seriesKeys
-    .flatMap((key) => chartData.map((row) => toNumber(row[key])))
+  const visibleSeriesKeys = seriesKeys.filter(
+    (key) => visibleLines[key] !== false,
+  );
+  const visibleValues = visibleSeriesKeys
+    .flatMap((key) => displayChartData.map((row) => toNumber(row[key])))
     .filter((v) => v !== null);
-  const minValue = Math.min(...allValues);
-  const maxValue = Math.max(...allValues);
-  const valueRange = maxValue - minValue || 1;
+
+  const minValue = visibleValues.length ? Math.min(...visibleValues) : 0;
+  const maxValue = visibleValues.length ? Math.max(...visibleValues) : 1;
+  const yAxisScale = computeYAxisScale(minValue, maxValue, 5);
+  const yScaleMin = yAxisScale.min;
+  const yScaleMax = yAxisScale.max;
+  const valueRange = yScaleMax - yScaleMin || 1;
   const yearRange = maxYear - minYear || 1;
 
-  const innerWidth = CHART_WIDTH - PADDING.left - PADDING.right;
   const innerHeight = CHART_HEIGHT - PADDING.top - PADDING.bottom;
-  const yTicks = 5;
+  const xPlotLeft = PADDING.left + X_AXIS_INSET;
+  const xPlotRight = CHART_WIDTH - PADDING.right - X_AXIS_INSET;
+  const xPlotWidth = xPlotRight - xPlotLeft;
 
-  const xForYear = (year) =>
-    PADDING.left + ((year - minYear) / yearRange) * innerWidth;
+  const xForYear = (year) => {
+    if (yearRange === 0) return xPlotLeft + xPlotWidth / 2;
+    return xPlotLeft + ((year - minYear) / yearRange) * xPlotWidth;
+  };
   const yForValue = (value) =>
-    PADDING.top + ((maxValue - value) / valueRange) * innerHeight;
+    PADDING.top + ((yScaleMax - value) / valueRange) * innerHeight;
 
-  const xTickYears = [minYear, Math.round((minYear + maxYear) / 2), maxYear].filter(
-    (year, index, arr) => arr.indexOf(year) === index,
-  );
-  const visibleSeriesKeys = seriesKeys.filter((key) => visibleLines[key]);
+  const xTickYears = (() => {
+    const sorted = [...years].sort((a, b) => a - b);
+    if (sorted.length <= 18) return sorted;
+    const step = Math.max(1, Math.ceil(sorted.length / 16));
+    return sorted.filter(
+      (_, index) => index % step === 0 || index === sorted.length - 1,
+    );
+  })();
 
-  const xPositions = useMemo(
-    () => chartData.map((row) => xForYear(row.year)),
-    [chartData, yearRange, minYear],
-  );
+  const xPositions = displayChartData.map((row) => xForYear(row.year));
 
-  const hoveredRow = hoveredIndex === null ? null : chartData[hoveredIndex];
+  const xAxisY = PADDING.top + innerHeight;
+  const xTickLabelY = xAxisY + X_LABEL_GAP;
+  const xAxisTitleX = xPlotLeft + xPlotWidth / 2;
+  const xAxisTitleY = xAxisY + 48;
+  const xLabelRotation = -42;
+
+  const hoveredRow =
+    hoveredIndex === null ? null : displayChartData[hoveredIndex];
 
   const handleLegendToggle = (key) => {
-    const visibleCount = Object.values(visibleLines).filter(Boolean).length;
-    if (visibleLines[key] && visibleCount === 1) return;
-    setVisibleLines((prev) => ({ ...prev, [key]: !prev[key] }));
+    const visibleCount = seriesKeys.filter(
+      (k) => visibleLines[k] !== false,
+    ).length;
+    if (visibleLines[key] !== false && visibleCount === 1) return;
+    setVisibleLines((prev) => {
+      const isVisible = prev[key] !== false;
+      return { ...prev, [key]: isVisible ? false : true };
+    });
   };
+
+  const visibleCount = visibleSeriesKeys.length;
+  const yearCount = displayChartData.length;
+  const clusterWidth =
+    yearCount > 1
+      ? Math.min(56, (xPlotWidth / Math.max(yearCount - 1, 1)) * 0.55)
+      : 48;
+  const barWidth = Math.max(
+    4,
+    (clusterWidth / Math.max(visibleCount, 1)) * 0.88,
+  );
 
   return (
     <div className="chart-wrapper dataset-chart-wrapper">
-      <div className="dlc-header">
-        <div className="dlc-right">
-          <div className="dlc-accent" />
-          <div className="dlc-title-wrap">
-            <h3>{unit ? `${title} (${unit})` : title}</h3>
-            <p>
-              {language === "EN" ? "Interactive line chart" : "ინტერაქტიული ხაზოვანი დიაგრამა"}
-            </p>
-          </div>
-        </div>
-      </div>
+      <ChartHeader
+        displayTitle={chartTitle}
+        language={language}
+        showDownloads
+        onDownloadPng={handleDownloadPng}
+        onDownloadPdf={handleDownloadPdf}
+        onDownloadXls={handleDownloadXls}
+      />
 
       <div className="chart-canvas w-full overflow-x-auto relative">
         <svg
+          ref={svgRef}
           viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-          className="w-full min-w-[680px] h-[400px] bg-white border border-[#e5e7eb] rounded"
+          preserveAspectRatio="xMidYMid meet"
+          className="dataset-chart-svg w-full h-auto block"
           onMouseLeave={() => setHoveredIndex(null)}
           onMouseMove={(event) => {
             const bounds = event.currentTarget.getBoundingClientRect();
@@ -139,13 +383,19 @@ const DatasetLineChart = ({ chartModel, language }) => {
             setHoveredIndex(closestIndex);
           }}
         >
-          {Array.from({ length: yTicks + 1 }).map((_, i) => {
-            const ratio = i / yTicks;
-            const y = PADDING.top + ratio * innerHeight;
-            const value = maxValue - ratio * valueRange;
+          {yAxisScale.ticks.map((tickValue) => {
+            const y =
+              PADDING.top +
+              ((yScaleMax - tickValue) / valueRange) * innerHeight;
             return (
-              <g key={`y-${i}`}>
-                <line x1={PADDING.left} y1={y} x2={CHART_WIDTH - PADDING.right} y2={y} stroke="#e5e7eb" />
+              <g key={`y-${tickValue}`}>
+                <line
+                  x1={xPlotLeft}
+                  y1={y}
+                  x2={xPlotRight}
+                  y2={y}
+                  stroke="#e5e7eb"
+                />
                 <text
                   x={PADDING.left - 8}
                   y={y + 4}
@@ -154,7 +404,7 @@ const DatasetLineChart = ({ chartModel, language }) => {
                   fill="#6b7280"
                   style={{ fontFamily: "myFont, sans-serif" }}
                 >
-                  {formatValue(value)}
+                  {formatAxisNumber(tickValue)}
                 </text>
               </g>
             );
@@ -162,9 +412,9 @@ const DatasetLineChart = ({ chartModel, language }) => {
 
           <line
             x1={PADDING.left}
-            y1={PADDING.top + innerHeight}
+            y1={xAxisY}
             x2={CHART_WIDTH - PADDING.right}
-            y2={PADDING.top + innerHeight}
+            y2={xAxisY}
             stroke="#9ca3af"
           />
           <line
@@ -179,13 +429,20 @@ const DatasetLineChart = ({ chartModel, language }) => {
             const x = xForYear(year);
             return (
               <g key={`x-${year}`}>
-                <line x1={x} y1={PADDING.top} x2={x} y2={PADDING.top + innerHeight} stroke="#f3f4f6" />
+                <line
+                  x1={x}
+                  y1={PADDING.top}
+                  x2={x}
+                  y2={PADDING.top + innerHeight}
+                  stroke="#f3f4f6"
+                />
                 <text
                   x={x}
-                  y={CHART_HEIGHT - 14}
-                  textAnchor="middle"
-                  fontSize="11"
+                  y={xTickLabelY}
+                  textAnchor="end"
+                  fontSize="9"
                   fill="#6b7280"
+                  transform={`rotate(${xLabelRotation}, ${x}, ${xTickLabelY})`}
                   style={{ fontFamily: "myFont, sans-serif" }}
                 >
                   {formatYear(year)}
@@ -194,34 +451,111 @@ const DatasetLineChart = ({ chartModel, language }) => {
             );
           })}
 
-          {visibleSeriesKeys.map((key, index) => {
-            const color = SERIES_COLORS[index % SERIES_COLORS.length];
-            const points = chartData.map((row) => {
-              const yValue = toNumber(row[key]);
-              return {
-                x: xForYear(row.year),
-                y: yValue === null ? null : yForValue(yValue),
-              };
-            });
-            const path = makePath(points);
-            if (!path) return null;
-            return (
-              <g key={key}>
-                <path d={path} fill="none" stroke={color} strokeWidth="2.5" />
-                {points.map((point, pointIndex) =>
-                  point.y === null ? null : (
-                    <circle
-                      key={`${key}-${pointIndex}`}
-                      cx={point.x}
-                      cy={point.y}
-                      r={hoveredIndex === pointIndex ? 4 : 2.5}
-                      fill={color}
-                    />
-                  ),
-                )}
-              </g>
-            );
-          })}
+          {chartType === "bar"
+            ? visibleSeriesKeys.map((key, seriesIndex) => {
+                const color = getSeriesColor(key, seriesIndex);
+                return (
+                  <g key={key}>
+                    {displayChartData.map((row, pointIndex) => {
+                      const yValue = toNumber(row[key]);
+                      if (yValue === null) return null;
+                      const centerX = xForYear(row.year);
+                      const x =
+                        centerX -
+                        (visibleCount * barWidth) / 2 +
+                        seriesIndex * barWidth;
+                      const y = yForValue(yValue);
+                      const height = xAxisY - y;
+                      const dimmed =
+                        hoveredIndex !== null && hoveredIndex !== pointIndex;
+                      return (
+                        <rect
+                          key={`${key}-${pointIndex}`}
+                          x={x}
+                          y={y}
+                          width={barWidth}
+                          height={height}
+                          fill={color}
+                          opacity={dimmed ? 0.35 : 1}
+                          rx={2}
+                        />
+                      );
+                    })}
+                  </g>
+                );
+              })
+            : visibleSeriesKeys.map((key, index) => {
+                const color = getSeriesColor(key, index);
+                const points = displayChartData.map((row) => {
+                  const yValue = toNumber(row[key]);
+                  return {
+                    x: xForYear(row.year),
+                    y: yValue === null ? null : yForValue(yValue),
+                  };
+                });
+                const hasPoint = points.some((p) => p.y !== null);
+                if (!hasPoint) return null;
+                return (
+                  <g key={key}>
+                    {points.map((point, pointIndex) => {
+                      if (pointIndex === 0 || point.y === null) return null;
+                      const prev = points[pointIndex - 1];
+                      if (prev.y === null) return null;
+                      const segmentDimmed =
+                        hoveredIndex !== null &&
+                        hoveredIndex !== pointIndex &&
+                        hoveredIndex !== pointIndex - 1;
+                      return (
+                        <line
+                          key={`${key}-seg-${pointIndex}`}
+                          x1={prev.x}
+                          y1={prev.y}
+                          x2={point.x}
+                          y2={point.y}
+                          stroke={color}
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          opacity={segmentDimmed ? 0.35 : 1}
+                        />
+                      );
+                    })}
+                    {points.map((point, pointIndex) => {
+                      if (point.y === null) return null;
+                      const pointDimmed =
+                        hoveredIndex !== null && hoveredIndex !== pointIndex;
+                      const icon = getSeriesMarkerIcon(key);
+                      const size =
+                        hoveredIndex === pointIndex
+                          ? MARKER_SIZE_HOVER
+                          : MARKER_SIZE;
+                      if (icon) {
+                        return (
+                          <image
+                            key={`${key}-${pointIndex}`}
+                            href={icon}
+                            x={point.x - size / 2}
+                            y={point.y - size / 2}
+                            width={size}
+                            height={size}
+                            opacity={pointDimmed ? 0.35 : 1}
+                            preserveAspectRatio="xMidYMid meet"
+                          />
+                        );
+                      }
+                      return (
+                        <circle
+                          key={`${key}-${pointIndex}`}
+                          cx={point.x}
+                          cy={point.y}
+                          r={hoveredIndex === pointIndex ? 4 : 2.5}
+                          fill={color}
+                          opacity={pointDimmed ? 0.35 : 1}
+                        />
+                      );
+                    })}
+                  </g>
+                );
+              })}
 
           {hoveredRow ? (
             <line
@@ -235,11 +569,11 @@ const DatasetLineChart = ({ chartModel, language }) => {
           ) : null}
 
           <text
-            x={CHART_WIDTH / 2}
-            y={CHART_HEIGHT - 4}
+            x={xAxisTitleX}
+            y={xAxisTitleY}
             textAnchor="middle"
-            fontSize="12"
-            fill="#374151"
+            fontSize="11"
+            fill="#6b7280"
             style={{ fontFamily: "myFont, sans-serif" }}
           >
             {yearLabel}
@@ -247,45 +581,72 @@ const DatasetLineChart = ({ chartModel, language }) => {
         </svg>
 
         {hoveredRow ? (
-          <div
-            className="custom-tooltip absolute top-3 right-3 text-xs shadow-sm"
-          >
+          <div className="custom-tooltip absolute top-3 right-3 text-xs shadow-sm">
             <div className="tooltip-container">
               <p className="tooltip-label">
-              {formatYear(hoveredRow.year)} {language === "EN" ? "Year" : "წელი"}
+                {formatYear(hoveredRow.year)}{" "}
+                {language === "EN" ? "Year" : "წელი"}
               </p>
-              {visibleSeriesKeys.map((key, index) => (
-                <p key={`tooltip-${key}`} className="text">
-                  <span>
-                  <span
-                      className="before-span"
-                    style={{ backgroundColor: SERIES_COLORS[index % SERIES_COLORS.length] }}
-                  />
-                  {key}:
-                  </span>
-                  <span className="value">{formatValue(toNumber(hoveredRow[key]))}</span>
-                </p>
-              ))}
+              {visibleSeriesKeys.map((key, index) => {
+                const markerIcon = getSeriesMarkerIcon(key);
+                return (
+                  <p key={`tooltip-${key}`} className="text">
+                    <span>
+                      {markerIcon ? (
+                        <img
+                          src={markerIcon}
+                          alt=""
+                          className="tooltip-marker-icon"
+                        />
+                      ) : (
+                        <span
+                          className="before-span"
+                          style={{
+                            backgroundColor: getSeriesColor(key, index),
+                          }}
+                        />
+                      )}
+                      {key}:
+                    </span>
+                    <span className="value">
+                      {formatValue(toNumber(hoveredRow[key]))}
+                    </span>
+                  </p>
+                );
+              })}
             </div>
           </div>
         ) : null}
       </div>
 
       <ul className="recharts-default-legend">
-        {seriesKeys.map((key, index) => (
-          <li
-            key={key}
-            onClick={() => handleLegendToggle(key)}
-            className="recharts-legend-item"
-            style={{ opacity: visibleLines[key] ? 1 : 0.45 }}
-          >
-            <span
-              className="recharts-legend-item-icon"
-              style={{ backgroundColor: SERIES_COLORS[index % SERIES_COLORS.length] }}
-            />
-            <span className="recharts-legend-item-text">{key}</span>
-          </li>
-        ))}
+        {seriesKeys.map((key, index) => {
+          const markerIcon = getSeriesMarkerIcon(key);
+          return (
+            <li
+              key={key}
+              onClick={() => handleLegendToggle(key)}
+              className="recharts-legend-item"
+              style={{ opacity: visibleLines[key] !== false ? 1 : 0.45 }}
+            >
+              {markerIcon ? (
+                <img
+                  src={markerIcon}
+                  alt=""
+                  className="recharts-legend-item-icon-img"
+                />
+              ) : (
+                <span
+                  className="recharts-legend-item-icon"
+                  style={{
+                    backgroundColor: getSeriesColor(key, index),
+                  }}
+                />
+              )}
+              <span className="recharts-legend-item-text">{key}</span>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
