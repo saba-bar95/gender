@@ -1,0 +1,38 @@
+.statistics-chart-row {
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+}
+
+.statistics-chart-main {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  transition: opacity 0.2s ease;
+}
+
+.statistics-chart-row--updating .statistics-chart-main {
+  opacity: 0.55;
+}
+
+.statistics-chart-update-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: 10px;
+  background: rgb(252 254 255 / 35%);
+  pointer-events: none;
+}
+
+.statistics-chart-row--updating .dataset-chart-wrapper {
+  pointer-events: none;
+}
+
+.group-chart-image {
+  flex-shrink: 0;
+  padding-bottom: 4px;
+
+  img {
+    display: block;
+  }
+}
