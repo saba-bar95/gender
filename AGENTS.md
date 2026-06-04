@@ -10,14 +10,25 @@ This file provides essential guidance for AI coding agents working in this monor
 ## Build & Run Commands
 
 ### Frontend
-- **Development:** `npm run dev` (in `frontend/`)
+- **Development:** `npm run dev` (in `frontend/`) → **http://localhost:3000**
 - **Build:** `npm run build` (in `frontend/`)
-- **Preview:** `npm run preview` (in `frontend/`)
+- **Preview:** `npm run preview` (in `frontend/`) → **http://localhost:3000** (production build)
 - **Lint:** `npm run lint` (in `frontend/`)
 
 ### Backend
-- **Development:** `npm run dev` (in `backend/`)
+- **Development:** `npm run dev` (in `backend/`) → **http://localhost:3001**
 - **Production:** `npm start` (in `backend/`)
+
+### Local ports (default)
+
+| Service | Port | URL |
+|--------|------|-----|
+| React app (Vite dev / preview) | **3000** | http://localhost:3000 |
+| Express API | **3001** | http://localhost:3001 |
+
+On another device on the same network, use your PC’s IP instead of `localhost`, e.g. `http://192.168.1.10:3000`.
+
+Chart/statistics data is loaded from `https://pcaxis-api.geostat.ge` (no local port). Glossary and other DB features need the backend on **3001** and a `frontend/.env` file containing `VITE_API_URL=http://localhost:3001`.
 
 ## Key Conventions
 
@@ -36,7 +47,7 @@ This file provides essential guidance for AI coding agents working in this monor
 
 ## Environment
 
-- **Frontend:** No special env vars required for local dev.
+- **Frontend:** Optional `frontend/.env` with `VITE_API_URL=http://localhost:3001` for glossary/DB APIs. Charts work without it.
 - **Backend:** Requires `.env` file with MSSQL connection details (`DB_USER`, `DB_PASSWORD`, `DB_SERVER`, `DB_NAME`, etc.).
 
 ## Useful Links
