@@ -34,5 +34,47 @@
 
   img {
     display: block;
+    max-width: 100px;
+    height: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .statistics-chart-row {
+    gap: 16px;
+  }
+
+  .group-chart-image img {
+    max-width: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .statistics-chart-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .statistics-chart-update-overlay {
+    border-radius: 8px;
+  }
+
+  .group-chart-image {
+    align-self: center;
+    padding-bottom: 0;
+
+    img {
+      max-width: 64px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .statistics-chart-row {
+    gap: 10px;
+  }
+
+  .group-chart-image img {
+    max-width: 52px;
   }
 }

@@ -62,6 +62,40 @@ const formatValue = (value) =>
 const formatAxisNumber = (value) =>
   Math.round(value).toLocaleString(undefined, { maximumFractionDigits: 0 });
 
+/**
+ * Maps viewBox x to pixel offset inside the chart canvas (handles SVG letterboxing).
+ * @param {SVGSVGElement} svg
+ * @param {HTMLElement} canvasEl
+ * @param {number} viewBoxX
+ */
+const mapViewBoxXToCanvas = (svg, canvasEl, viewBoxX) => {
+  const svgRect = svg.getBoundingClientRect();
+  const canvasRect = canvasEl.getBoundingClientRect();
+  const scale = Math.min(
+    svgRect.width / CHART_WIDTH,
+    svgRect.height / CHART_HEIGHT,
+  );
+  const renderedWidth = CHART_WIDTH * scale;
+  const offsetX = (svgRect.width - renderedWidth) / 2;
+  const xInSvg = offsetX + viewBoxX * scale;
+  return svgRect.left - canvasRect.left + xInSvg;
+};
+
+/**
+ * @param {SVGSVGElement} svg
+ * @param {number} clientX
+ */
+const clientXToViewBoxX = (svg, clientX) => {
+  const bounds = svg.getBoundingClientRect();
+  const scale = Math.min(
+    bounds.width / CHART_WIDTH,
+    bounds.height / CHART_HEIGHT,
+  );
+  const renderedWidth = CHART_WIDTH * scale;
+  const offsetX = (bounds.width - renderedWidth) / 2;
+  return (clientX - bounds.left - offsetX) / scale;
+};
+
 /** @param {number} roughStep */
 const niceStep = (roughStep) => {
   if (!Number.isFinite(roughStep) || roughStep <= 0) return 1;
@@ -240,7 +274,11 @@ const DatasetLineChart = ({
     recentPoints.length > 0 ? recentPoints : pointsWithYear;
   const chartTitle = displayTitle ?? (unit ? `${title} (${unit})` : title);
   const svgRef = useRef(null);
+  const canvasRef = useRef(null);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [tooltipAnchor, setTooltipAnchor] = useState(
+    /** @type {{ x: number; flipLeft: boolean } | null} */ (null),
+  );
   const [visibleLines, setVisibleLines] = useState(
     Object.fromEntries(seriesKeys.map((key) => [key, true])),
   );
@@ -360,17 +398,22 @@ const DatasetLineChart = ({
         onDownloadXls={handleDownloadXls}
       />
 
-      <div className="chart-canvas w-full overflow-x-auto relative">
+      <div
+        ref={canvasRef}
+        className="chart-canvas w-full overflow-x-auto relative"
+      >
         <svg
           ref={svgRef}
           viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
           preserveAspectRatio="xMidYMid meet"
           className="dataset-chart-svg w-full h-auto block"
-          onMouseLeave={() => setHoveredIndex(null)}
+          onMouseLeave={() => {
+            setHoveredIndex(null);
+            setTooltipAnchor(null);
+          }}
           onMouseMove={(event) => {
-            const bounds = event.currentTarget.getBoundingClientRect();
-            const ratio = CHART_WIDTH / bounds.width;
-            const localX = (event.clientX - bounds.left) * ratio;
+            const svg = event.currentTarget;
+            const localX = clientXToViewBoxX(svg, event.clientX);
             let closestIndex = 0;
             let minDistance = Math.abs(localX - xPositions[0]);
             for (let i = 1; i < xPositions.length; i += 1) {
@@ -379,6 +422,14 @@ const DatasetLineChart = ({
                 minDistance = distance;
                 closestIndex = i;
               }
+            }
+            const hoveredX = xPositions[closestIndex];
+            const canvasEl = canvasRef.current;
+            if (canvasEl) {
+              setTooltipAnchor({
+                x: mapViewBoxXToCanvas(svg, canvasEl, hoveredX),
+                flipLeft: hoveredX > xPlotLeft + xPlotWidth / 2,
+              });
             }
             setHoveredIndex(closestIndex);
           }}
@@ -580,8 +631,15 @@ const DatasetLineChart = ({
           </text>
         </svg>
 
-        {hoveredRow ? (
-          <div className="custom-tooltip absolute top-3 right-3 text-xs shadow-sm">
+        {hoveredRow && tooltipAnchor ? (
+          <div
+            className={`custom-tooltip absolute text-xs shadow-sm${
+              tooltipAnchor.flipLeft
+                ? " custom-tooltip--flip-left"
+                : " custom-tooltip--flip-right"
+            }`}
+            style={{ top: 12, left: tooltipAnchor.x }}
+          >
             <div className="tooltip-container">
               <p className="tooltip-label">
                 {formatYear(hoveredRow.year)}{" "}

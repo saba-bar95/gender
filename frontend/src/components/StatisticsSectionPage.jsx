@@ -57,7 +57,7 @@ const StatisticsSectionPage = ({
   const [chartType, setChartType] = useState("line");
 
   const panel = (children) => (
-    <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-sm p-8">
+    <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
       {children}
     </div>
   );
@@ -67,7 +67,10 @@ const StatisticsSectionPage = ({
       return <div className="mt-2">{children}</div>;
     }
     return (
-      <div className="px-6 md:px-16 py-10" style={{ backgroundColor: "#f6f6f6" }}>
+      <div
+        className="px-6 md:px-16 py-10"
+        style={{ backgroundColor: "#f6f6f6" }}
+      >
         {children}
       </div>
     );
@@ -106,7 +109,7 @@ const StatisticsSectionPage = ({
   return wrap(
     <>
       {embedded ? (
-        <div className="max-w-6xl mx-auto mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto mb-4 flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => navigate("/#statistics")}
