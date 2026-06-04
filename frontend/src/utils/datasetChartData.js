@@ -1,42 +1,101 @@
-import { getFilterDimensionCodes } from "./datasetFilters";
+import { getFilterDimensionCodes, isYearVariable } from "./datasetFilters";
 
-const YEAR_KEYS = ["year", "Year", "წელი"];
+const YEAR_ROW_KEYS = ["year", "Year", "Years", "years", "წელი"];
+const GENERIC_VALUE_KEYS = new Set(["value", "Value", "VALUE"]);
+
+/**
+ * @param {unknown[]} variables
+ */
+const findYearMetadataVariable = (variables) => {
+  if (!Array.isArray(variables)) return null;
+  return variables.find((v) => v && isYearVariable(v)) ?? null;
+};
+
+/**
+ * Maps PX index codes (0, 1, 2…) to calendar years from metadata valueTexts.
+ * @param {Record<string, unknown> | null | undefined} yearVariable
+ */
+const buildYearIndexMap = (yearVariable) => {
+  if (!yearVariable) return null;
+
+  const codes = Array.isArray(yearVariable.values)
+    ? yearVariable.values.map(String)
+    : [];
+  const labels = Array.isArray(yearVariable.valueTexts)
+    ? yearVariable.valueTexts.map(String)
+    : [];
+
+  if (!codes.length || codes.length !== labels.length) return null;
+
+  const map = new Map();
+  for (let i = 0; i < codes.length; i += 1) {
+    const calendarYear = Number(labels[i]);
+    if (Number.isNaN(calendarYear)) continue;
+    map.set(codes[i], calendarYear);
+    const codeNum = Number(codes[i]);
+    if (!Number.isNaN(codeNum)) map.set(codeNum, calendarYear);
+  }
+
+  return map.size ? map : null;
+};
+
+/**
+ * @param {number} raw
+ * @param {Map<string | number, number> | null} yearIndexMap
+ */
+const toCalendarYear = (raw, yearIndexMap) => {
+  if (yearIndexMap?.has(raw)) return yearIndexMap.get(raw);
+  if (yearIndexMap?.has(String(raw))) return yearIndexMap.get(String(raw));
+  if (raw >= 1900 && raw <= 2100) return raw;
+  return raw;
+};
 
 /**
  * @param {Record<string, unknown>} row
+ * @param {Map<string | number, number> | null} yearIndexMap
  */
-const getYearFromRow = (row) => {
-  for (const key of YEAR_KEYS) {
-    if (key in row && row[key] != null) {
-      return Number(row[key]);
+const getYearFromRow = (row, yearIndexMap) => {
+  for (const key of YEAR_ROW_KEYS) {
+    if (key in row && row[key] != null && row[key] !== "") {
+      const raw = Number(row[key]);
+      if (Number.isNaN(raw)) return null;
+      return toCalendarYear(raw, yearIndexMap);
     }
   }
   return null;
 };
 
-const isDimensionColumn = (key, dimensionSet) => {
-  if (YEAR_KEYS.includes(key)) return true;
+/**
+ * @param {string} title
+ */
+const stripYearSuffixFromTitle = (title) =>
+  String(title ?? "")
+    .replace(/\s*-\s*წელი\s*$/i, "")
+    .trim();
+
+/**
+ * @param {string} key
+ * @param {string[]} dimensionKeys
+ */
+const isDimensionColumn = (key, dimensionKeys) => {
+  if (YEAR_ROW_KEYS.includes(key)) return true;
   const lower = key.toLowerCase();
-  return dimensionSet.has(key) || dimensionSet.has(lower);
+  return dimensionKeys.some(
+    (dim) => dim === key || dim.toLowerCase() === lower,
+  );
 };
 
 /**
- * Series keys = value columns in each row (exclude year / PX dimension codes).
  * @param {Record<string, unknown>[]} rows
  * @param {string[]} categories
  * @param {string[]} dimensions
  */
-const resolveSeriesKeys = (rows, categories, dimensions) => {
+const resolveRawSeriesKeys = (rows, categories, dimensions) => {
   const sample = rows[0];
   if (!sample) return [];
 
-  const dimensionSet = new Set([
-    ...(dimensions ?? []).map((d) => d.toLowerCase()),
-    ...(dimensions ?? []),
-  ]);
-
   const keysFromRows = Object.keys(sample).filter(
-    (key) => !isDimensionColumn(key, dimensionSet),
+    (key) => !isDimensionColumn(key, dimensions),
   );
 
   if (categories?.length) {
@@ -48,21 +107,57 @@ const resolveSeriesKeys = (rows, categories, dimensions) => {
 };
 
 /**
+ * Single-series datasets expose a generic "value" column; label from API metadata.
+ * @param {string[]} rawKeys
+ * @param {string[]} categories
+ * @param {Record<string, unknown>} data
+ * @param {Record<string, unknown>} metadata
+ */
+const resolveSeriesKeysWithLabels = (rawKeys, categories, data, metadata) => {
+  if (rawKeys.length === 1 && GENERIC_VALUE_KEYS.has(rawKeys[0])) {
+    const label =
+      categories?.[0] ||
+      stripYearSuffixFromTitle(data?.title) ||
+      metadata?.metadata?.title ||
+      data?.name ||
+      metadata?.name ||
+      rawKeys[0];
+
+    return { seriesKeys: [String(label)], valueKey: rawKeys[0] };
+  }
+
+  return { seriesKeys: rawKeys, valueKey: null };
+};
+
+/**
  * @param {{ data: Record<string, unknown>; metadata: Record<string, unknown> }} payload
  */
 export function buildChartModelFromPayload({ data, metadata }) {
   const rows = Array.isArray(data?.data) ? data.data : [];
   const categories = Array.isArray(data?.categories) ? data.categories : [];
   const apiDimensions = Array.isArray(data?.dimensions) ? data.dimensions : [];
-  const filterCodes = getFilterDimensionCodes(
-    metadata?.metadata?.variables ?? [],
-  );
+  const variables = metadata?.metadata?.variables ?? [];
+  const filterCodes = getFilterDimensionCodes(variables);
   const dimensions = [...new Set([...apiDimensions, ...filterCodes])];
-  const seriesKeys = resolveSeriesKeys(rows, categories, dimensions);
+
+  const yearVariable = findYearMetadataVariable(variables);
+  const yearIndexMap = buildYearIndexMap(yearVariable);
+
+  const rawSeriesKeys = resolveRawSeriesKeys(rows, categories, dimensions);
+  const { seriesKeys, valueKey } = resolveSeriesKeysWithLabels(
+    rawSeriesKeys,
+    categories,
+    data,
+    metadata,
+  );
+
+  const dataKeys = valueKey
+    ? seriesKeys.map((label) => ({ label, sourceKey: valueKey }))
+    : seriesKeys.map((key) => ({ label: key, sourceKey: key }));
 
   const byYear = new Map();
   for (const row of rows) {
-    const year = getYearFromRow(row);
+    const year = getYearFromRow(row, yearIndexMap);
     if (year == null || Number.isNaN(year)) continue;
     byYear.set(year, row);
   }
@@ -71,9 +166,9 @@ export function buildChartModelFromPayload({ data, metadata }) {
     .sort(([a], [b]) => a - b)
     .map(([year, row]) => {
       const point = { year };
-      for (const key of seriesKeys) {
-        const value = row[key];
-        point[key] =
+      for (const { label, sourceKey } of dataKeys) {
+        const value = row[sourceKey];
+        point[label] =
           value === null || value === undefined || value === ""
             ? null
             : Number(value);
@@ -84,7 +179,7 @@ export function buildChartModelFromPayload({ data, metadata }) {
   const metaTitle = metadata?.metadata?.title;
   const title = data?.title || metaTitle || data?.name || metadata?.name || "";
 
-  const variableLabels = (metadata?.metadata?.variables ?? []).reduce(
+  const variableLabels = variables.reduce(
     (acc, variable) => {
       if (variable?.code) acc[variable.code] = variable.text ?? variable.code;
       return acc;
@@ -92,12 +187,19 @@ export function buildChartModelFromPayload({ data, metadata }) {
     /** @type {Record<string, string>} */ ({}),
   );
 
+  const yearLabel =
+    yearVariable?.text ??
+    variableLabels.Years ??
+    variableLabels.Year ??
+    variableLabels.year ??
+    "Year";
+
   return {
     title,
     unit: data?.unit ?? "",
     seriesKeys,
     chartData,
     variableLabels,
-    yearLabel: variableLabels.Year ?? variableLabels.year ?? "Year",
+    yearLabel,
   };
 }

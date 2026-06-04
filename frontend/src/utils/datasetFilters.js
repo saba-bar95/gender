@@ -5,7 +5,7 @@
  * @property {string[]} valueTexts - Option labels sent to the API
  */
 
-const YEAR_PATTERN = /^(year|წელი)$/i;
+const YEAR_PATTERN = /^(years?|წელი)$/i;
 const GENDER_PATTERN = /^(gender|sex|სქესი)$/i;
 
 /** Year/time dimensions map to the chart x-axis, not filter dropdowns. */
