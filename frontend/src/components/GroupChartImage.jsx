@@ -2,10 +2,10 @@ import { getGroupChartImage } from "../utils/chartGroupImages";
 import "./GroupChartImage.scss";
 
 /**
- * @param {{ sectionId: string; groupName: string }} props
+ * @param {{ sectionId: string; groupName: string; datasetId?: string }} props
  */
-const GroupChartImage = ({ sectionId, groupName }) => {
-  const image = getGroupChartImage(sectionId, groupName);
+const GroupChartImage = ({ sectionId, groupName, datasetId }) => {
+  const image = getGroupChartImage(sectionId, groupName, datasetId);
   if (!image) return null;
 
   return (
