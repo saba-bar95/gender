@@ -11,7 +11,9 @@ import matsneLogo from "../assets/img/lnk/macne.png";
 import defenderLogo from "../assets/img/lnk/damcveli.png";
 import arrLeft from "../assets/img/new/arr-left.png";
 import arrRight from "../assets/img/new/arr-right.png";
+import sectionImage from "../assets/images/section.png";
 import { useGenderStatisticsSections } from "../hooks/useGenderStatisticsSections";
+import { hasSectionPdfs, openSectionPdfs } from "../utils/sectionPdfs";
 
 // SDG goal images
 const sdgImagesKa = Object.fromEntries(
@@ -115,32 +117,61 @@ const t = {
   },
 };
 
-const SectionTitle = ({ title }) => (
-  <div className="w-full flex justify-center py-6">
-    <div className="flex items-center gap-3 md:gap-5">
-      <img
-        src={arrLeft}
-        alt="Left decoration"
-        style={{ width: "163px", height: "12px" }}
-      />
-      <h2
-        style={{
-          fontSize: "24px",
-          color: "#e4535f",
-          fontFamily: "bpg-nino, sans-serif",
-          fontFeatureSettings: '"case" on',
-        }}
-      >
-        {title}
-      </h2>
-      <img
-        src={arrRight}
-        alt="Right decoration"
-        style={{ width: "163px", height: "12px" }}
-      />
+const SectionTitle = ({ title, statisticsSectionId, language = "GE" }) => {
+  const sectionPdfAvailable =
+    statisticsSectionId && hasSectionPdfs(statisticsSectionId, language);
+
+  const sectionImageEl = (
+    <img src={sectionImage} alt="" className="block w-full h-auto" />
+  );
+
+  return (
+    <div className="w-full flex justify-center py-4 sm:py-5 md:py-6 px-3 sm:px-4">
+      <div className="flex flex-col items-center gap-2 sm:gap-3 max-w-full">
+        <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-5 max-w-full">
+          <img
+            src={arrLeft}
+            alt="Left decoration"
+            className="w-14 sm:w-24 md:w-32 lg:w-[163px] h-auto shrink"
+          />
+          <h2
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-[#e4535f] text-center px-1 sm:px-2 min-w-0"
+            style={{
+              fontFamily: "bpg-nino, sans-serif",
+              fontFeatureSettings: '"case" on',
+            }}
+          >
+            {title}
+          </h2>
+          <img
+            src={arrRight}
+            alt="Right decoration"
+            className="w-14 sm:w-24 md:w-32 lg:w-[163px] h-auto shrink"
+          />
+        </div>
+        {sectionPdfAvailable ? (
+          <button
+            type="button"
+            className="border-0 bg-transparent p-0 cursor-pointer max-w-[48px] sm:max-w-[56px] md:max-w-none"
+            onClick={() => openSectionPdfs(statisticsSectionId, language)}
+            aria-label={
+              language === "EN"
+                ? "Open section PDF documents"
+                : "სექციის PDF დოკუმენტების გახსნა"
+            }
+            title={
+              language === "EN"
+                ? "Open section PDF documents"
+                : "სექციის PDF დოკუმენტების გახსნა"
+            }
+          >
+            {sectionImageEl}
+          </button>
+        ) : null}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Publications = ({ language }) => {
   const publicationTitles =
@@ -188,12 +219,15 @@ const Publications = ({ language }) => {
           "ვაჭრობასთან დაკავშირებული გენდერული სტატისტიკის შეფასება საქართველოში",
         ];
 
+  const publicationTitleClass =
+    "font-[myFont,sans-serif] text-sm sm:text-base md:text-[17px] lg:text-[19px] leading-snug font-bold text-[#337ab7] m-0 break-words";
+
   return (
-    <div className="w-full py-10 px-6 md:px-16">
+    <div className="w-full py-6 sm:py-8 md:py-10 px-4 sm:px-6 md:px-16">
       <SectionTitle
         title={language === "EN" ? "PUBLICATIONS" : "პუბლიკაციები"}
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-5 mt-5 sm:mt-6 md:mt-8 max-w-6xl mx-auto">
         {publicationTitles.map((title, idx) => {
           // Add links for the first sixteen publications
           let link = null;
@@ -296,64 +330,22 @@ const Publications = ({ language }) => {
           return (
             <div
               key={idx}
-              className="flex flex-col items-center justify-center p-4 rounded-lg border border-gray-300 hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer bg-white w-full"
-              style={{
-                minHeight: "150px",
-                textAlign: "center",
-              }}
+              className="flex flex-col items-center justify-center w-full min-h-[120px] sm:min-h-[135px] md:min-h-[150px] p-3 sm:p-4 md:p-5 rounded-lg border border-gray-300 bg-white text-center transition-all hover:border-blue-500 hover:shadow-lg cursor-pointer"
             >
-              <i
-                className="fa-solid fa-book"
-                style={{
-                  fontSize: "32px",
-                  color: "#e4535f",
-                  marginBottom: "12px",
-                }}
-              />
+              <i className="fa-solid fa-book text-[#e4535f] text-2xl sm:text-[28px] md:text-[32px] mb-2 sm:mb-2.5 md:mb-3 shrink-0" />
               {link ? (
                 <a
                   href={link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    fontFamily: "myFont, sans-serif",
-                    fontSize: "19px",
-                    lineHeight: "1.375em",
-                    fontWeight: "bold",
-                    color: "#337ab7",
-                    margin: 0,
-                    wordBreak: "break-word",
-                    textDecoration: "underline",
-                  }}
+                  className={`${publicationTitleClass} underline`}
                 >
                   {title}
                 </a>
               ) : (
-                <p
-                  style={{
-                    fontFamily: "myFont, sans-serif",
-                    fontSize: "19px",
-                    lineHeight: "1.375em",
-                    fontWeight: "bold",
-                    color: "#337ab7",
-                    margin: 0,
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {title}
-                </p>
+                <p className={publicationTitleClass}>{title}</p>
               )}
-              <p
-                style={{
-                  fontFamily: "myFont, sans-serif",
-                  fontSize: "12px",
-                  lineHeight: "1.375em",
-                  color: "#000",
-                  marginTop: "12px",
-                  marginBottom: 0,
-                  paddingBottom: "11px",
-                }}
-              >
+              <p className="font-[myFont,sans-serif] text-[10px] sm:text-[11px] md:text-xs leading-snug text-black mt-2 sm:mt-2.5 md:mt-3 mb-0 pb-2 sm:pb-2.5 md:pb-[11px]">
                 {language === "EN"
                   ? "Statistical Publication"
                   : "სტატისტიკური პუბლიკაცია"}
@@ -395,95 +387,37 @@ const legislationData = [
   },
 ];
 
+const legislationDividerClass =
+  "my-2 sm:my-2.5 md:my-[10px] h-px border-0 bg-[#d9edf7]";
+
 const Legislation = ({ language }) => {
-  const isMobile = useWindowWidth() < 768;
   const matsneItems = legislationData.slice(0, 4);
   const defenderItems = legislationData.slice(4);
 
-  const panelStyle = {
-    borderRadius: "4px",
-    background: "#fff",
-    padding: "12px 14px",
-    textAlign: "left",
-  };
-
-  const listItemStyle = {
-    listStyle: "none",
-    margin: 0,
-    padding: "10px 0",
-    fontFamily: "myFont, sans-serif",
-    fontSize: "14px",
-    lineHeight: "1.4",
-  };
-
-  const hrStyle = {
-    margin: "10px 0",
-    height: "1px",
-    border: "none",
-    backgroundColor: "#d9edf7",
-    backgroundImage: "linear-gradient(to right, cyan, #d3b1ff, #ffcced)",
-  };
-
   return (
-    <div
-      style={{
-        maxWidth: "1200px",
-        margin: "0 auto",
-        padding: "10px 0 20px",
-        boxShadow: "1px 1px 10px 1px rgb(204, 204, 204)",
-        backgroundColor: "#fff",
-        borderRadius: "10px",
-        position: "relative",
-        opacity: 1,
-        transition: "0.3s ease",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          gap: "20px",
-          alignItems: isMobile ? "stretch" : "flex-start",
-          padding: "20px",
-        }}
-      >
-        <div
-          style={{
-            flex: isMobile ? "0 0 auto" : "0 0 32%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: "6%",
-          }}
-        >
+    <div className="relative mx-auto max-w-[1200px] bg-white py-2 sm:py-2.5 md:py-3 pb-4 sm:pb-5 rounded-lg sm:rounded-[10px] shadow-[1px_1px_10px_1px_#ccc] transition-[0.3s] ease-[ease]">
+      <div className="flex flex-col md:flex-row items-stretch md:items-start gap-3 sm:gap-4 md:gap-5 p-3 sm:p-4 md:p-5">
+        <div className="flex shrink-0 md:flex-[0_0_32%] items-center justify-center mt-0 sm:mt-2 md:mt-[6%]">
           <img
             src={legislationSideIcon}
             alt="legislation"
-            style={{ width: isMobile ? "220px" : "75%", maxWidth: "320px" }}
+            className="h-auto w-[140px] sm:w-[180px] md:w-[220px] lg:w-[75%] max-w-[200px] sm:max-w-[260px] md:max-w-[300px] lg:max-w-[320px]"
           />
         </div>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={panelStyle}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                marginBottom: "8px",
-              }}
-            >
+        <div className="flex-1 min-w-0">
+          <div className="rounded bg-white p-2.5 sm:p-3 md:px-3.5 md:py-3 text-left">
+            <div className="flex items-center gap-2 sm:gap-2.5 md:gap-[10px] mb-1.5 sm:mb-2">
               <img
                 src={matsneLogo}
-                style={{ width: "40px", height: "40px", objectFit: "contain" }}
+                className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 object-contain shrink-0"
+                alt=""
               />
               <p
+                className="text-sm sm:text-base md:text-lg font-bold m-0"
                 style={{
                   color: "#0080bd",
-                  fontSize: "18px",
                   fontFamily: "bpg-nino, sans-serif",
-                  margin: 0,
-                  fontWeight: "bold",
                 }}
               >
                 {language === "EN"
@@ -492,51 +426,44 @@ const Legislation = ({ language }) => {
               </p>
             </div>
 
-            <ul style={{ margin: 0, padding: 0 }}>
+            <ul className="m-0 p-0">
               {matsneItems.map((item, i) => (
                 <React.Fragment key={i}>
-                  <li style={listItemStyle}>
+                  <li className="list-none m-0 py-2 sm:py-2.5 font-[myFont,sans-serif] text-xs sm:text-sm leading-snug">
                     <a
                       href={item.href}
                       target="_blank"
                       rel="noreferrer"
-                      style={{
-                        color: "#337ab7",
-                        textDecoration: "none",
-                        fontSize: "15px",
-                      }}
+                      className="text-[#337ab7] no-underline text-sm sm:text-[15px] leading-snug"
                       dangerouslySetInnerHTML={{
                         __html: language === "EN" ? item.titleEN : item.titleGE,
                       }}
                     />
                   </li>
-                  <hr style={hrStyle} />
+                  <hr
+                    className={legislationDividerClass}
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(to right, cyan, #d3b1ff, #ffcced)",
+                    }}
+                  />
                 </React.Fragment>
               ))}
             </ul>
           </div>
 
-          <div style={{ ...panelStyle, marginTop: "16px" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                marginBottom: "8px",
-              }}
-            >
+          <div className="rounded bg-white p-2.5 sm:p-3 md:px-3.5 md:py-3 text-left mt-3 sm:mt-4">
+            <div className="flex items-center gap-2 sm:gap-2.5 md:gap-[10px] mb-1.5 sm:mb-2">
               <img
                 src={defenderLogo}
                 alt={language === "EN" ? "Public Defender" : "სახალხო დამცველი"}
-                style={{ width: "40px", height: "40px", objectFit: "contain" }}
+                className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 object-contain shrink-0"
               />
               <p
+                className="text-sm sm:text-base md:text-lg font-bold m-0"
                 style={{
                   color: "#0080bd",
-                  fontSize: "18px",
                   fontFamily: "bpg-nino, sans-serif",
-                  margin: 0,
-                  fontWeight: "bold",
                 }}
               >
                 {language === "EN"
@@ -548,36 +475,40 @@ const Legislation = ({ language }) => {
               href="https://ombudsman.ge/geo/genderuli-tanastsoroba"
               target="_blank"
               rel="noreferrer"
-              style={{
-                display: "inline-block",
-                marginBottom: "10px",
-                color: "#337ab7",
-                textDecoration: "none",
-                fontFamily: "myFont, sans-serif",
-                fontSize: "15px",
-                lineHeight: "1.4",
-              }}
+              className="inline-block mb-2 sm:mb-2.5 text-[#337ab7] no-underline font-[myFont,sans-serif] text-sm sm:text-[15px] leading-snug"
             >
               {language === "EN" ? "Gender equality" : "გენდერის დეპარტამენტი"}
             </a>
-            <hr style={hrStyle} />
+            <hr
+              className={legislationDividerClass}
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, cyan, #d3b1ff, #ffcced)",
+              }}
+            />
 
-            <ul style={{ margin: 0, padding: 0 }}>
+            <ul className="m-0 p-0">
               {defenderItems.map((item, i) => (
                 <React.Fragment key={i}>
-                  <li style={listItemStyle}>
+                  <li className="list-none m-0 py-2 sm:py-2.5 font-[myFont,sans-serif] text-xs sm:text-sm leading-snug">
                     <a
                       href={item.href}
                       target="_blank"
                       rel="noreferrer"
-                      style={{ color: "#337ab7", textDecoration: "none" }}
+                      className="text-[#337ab7] no-underline text-sm sm:text-[15px] leading-snug"
                       dangerouslySetInnerHTML={{
                         __html: language === "EN" ? item.titleEN : item.titleGE,
                       }}
                     />
                   </li>
                   {i !== defenderItems.length - 1 ? (
-                    <hr style={hrStyle} />
+                    <hr
+                      className={legislationDividerClass}
+                      style={{
+                        backgroundImage:
+                          "linear-gradient(to right, cyan, #d3b1ff, #ffcced)",
+                      }}
+                    />
                   ) : null}
                 </React.Fragment>
               ))}
@@ -733,22 +664,16 @@ const Links = ({ language }) => {
                       <img
                         src={item.img}
                         alt="logo"
-                        style={{
-                          marginRight: "10px",
-                          marginLeft: "-60px",
-                          maxHeight: "45px",
-                          width: "45px",
-                          objectFit: "contain",
-                        }}
+                        className="mr-2 sm:mr-2.5 ml-0 sm:ml-0 md:ml-[-60px] h-8 w-8 sm:h-9 sm:w-9 md:h-[45px] md:w-[45px] object-contain shrink-0"
                       />
                       <a
                         href={item.href}
                         target="_blank"
                         rel="noreferrer"
+                        className="text-sm sm:text-[15px] leading-snug"
                         style={{
                           color: "#337ab7",
                           textDecoration: "none",
-                          fontSize: "15px",
                         }}
                       >
                         {language === "EN" ? item.titleEN : item.titleGE}
@@ -789,7 +714,10 @@ const StatCards = ({ language }) => {
 
   if (loading) {
     return (
-      <div className="mt-6 text-center text-gray-500" style={{ fontFamily: "myFont, sans-serif" }}>
+      <div
+        className="mt-6 text-center text-gray-500"
+        style={{ fontFamily: "myFont, sans-serif" }}
+      >
         {language === "EN" ? "Loading sections…" : "სექციები იტვირთება…"}
       </div>
     );
@@ -999,14 +927,20 @@ const Main = ({ language = "GE" }) => {
           <section
             key={idx}
             id={sectionIds[idx]}
-            className={`w-full ${idx === 1 ? "" : "py-10 px-6 md:px-16"}`}
+            className={`w-full ${idx === 1 ? "" : "py-6 sm:py-8 md:py-10 px-4 sm:px-6 md:px-16"}`}
             style={{ borderBottom: "1px solid #e5e7eb", ...sectionBg }}
           >
             {idx === 1 ? (
               <Publications language={language} />
             ) : (
               <>
-                <SectionTitle title={title} />
+                <SectionTitle
+                  title={title}
+                  language={language}
+                  statisticsSectionId={
+                    idx === 0 ? statisticsSectionId : undefined
+                  }
+                />
                 {idx === 0 ? (
                   statisticsSectionId ? (
                     <StatisticsSectionPage

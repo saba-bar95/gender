@@ -107,26 +107,51 @@ const resolveRawSeriesKeys = (rows, categories, dimensions) => {
 };
 
 /**
- * Single-series datasets expose a generic "value" column; label from API metadata.
+ * Human-readable series label for single-series charts (filtered slice or value column).
+ * @param {Record<string, unknown>} data
+ * @param {Record<string, unknown>} metadata
+ * @param {string} fallbackKey
+ */
+const getSingleSeriesLabel = (data, metadata, fallbackKey) =>
+  String(
+    stripYearSuffixFromTitle(data?.title) ||
+      metadata?.metadata?.title ||
+      data?.name ||
+      metadata?.name ||
+      data?.description ||
+      metadata?.description ||
+      fallbackKey,
+  ).trim();
+
+/**
+ * Single-series charts: generic "value" column or API-filtered category slice.
+ * Legend/tooltip use dataset title (language-aware), not the filter value or column name.
+ *
  * @param {string[]} rawKeys
  * @param {string[]} categories
  * @param {Record<string, unknown>} data
  * @param {Record<string, unknown>} metadata
  */
 const resolveSeriesKeysWithLabels = (rawKeys, categories, data, metadata) => {
-  if (rawKeys.length === 1 && GENERIC_VALUE_KEYS.has(rawKeys[0])) {
-    const label =
-      categories?.[0] ||
-      stripYearSuffixFromTitle(data?.title) ||
-      metadata?.metadata?.title ||
-      data?.name ||
-      metadata?.name ||
-      rawKeys[0];
-
-    return { seriesKeys: [String(label)], valueKey: rawKeys[0] };
+  if (rawKeys.length !== 1) {
+    return { seriesKeys: rawKeys, valueKey: null };
   }
 
-  return { seriesKeys: rawKeys, valueKey: null };
+  const rawKey = rawKeys[0];
+  const isGenericValue = GENERIC_VALUE_KEYS.has(rawKey);
+  const isFilteredSlice = data?.metadata?.filtered === true;
+
+  if (!isGenericValue && !isFilteredSlice) {
+    return { seriesKeys: rawKeys, valueKey: null };
+  }
+
+  const label = getSingleSeriesLabel(
+    data,
+    metadata,
+    categories?.[0] ?? rawKey,
+  );
+
+  return { seriesKeys: [label], valueKey: rawKey };
 };
 
 /**
@@ -194,10 +219,15 @@ export function buildChartModelFromPayload({ data, metadata }) {
     variableLabels.year ??
     "Year";
 
+  const seriesExportLabels = valueKey
+    ? seriesKeys.map(() => valueKey)
+    : [...seriesKeys];
+
   return {
     title,
     unit: data?.unit ?? "",
     seriesKeys,
+    seriesExportLabels,
     chartData,
     variableLabels,
     yearLabel,

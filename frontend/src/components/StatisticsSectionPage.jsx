@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useGenderStatisticsSections } from "../hooks/useGenderStatisticsSections";
 import { useGenderStatisticsDatasets } from "../hooks/useGenderStatisticsDatasets";
@@ -6,6 +6,7 @@ import { useGenderStatisticsDatasetChart } from "../hooks/useGenderStatisticsDat
 import { downloadChartCsv } from "../utils/chartDownloads";
 import ChartSidebar from "./ChartSidebar";
 import DatasetLineChart from "./DatasetLineChart";
+import "./GroupChartImage.scss";
 
 const hrStyle = {
   margin: "10px 0",
@@ -55,6 +56,24 @@ const StatisticsSectionPage = ({
   const meta = sections.find((s) => s.id === sectionId);
   const loading = sectionsLoading || datasetsLoading;
   const [chartType, setChartType] = useState("line");
+  const chartAnchorRef = useRef(null);
+
+  const scrollChartIntoView = useCallback(() => {
+    const el = chartAnchorRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "nearest",
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    scrollChartIntoView();
+  }, [selectedId, chartModel, chartLoading, scrollChartIntoView]);
 
   const panel = (children) => (
     <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
@@ -109,17 +128,17 @@ const StatisticsSectionPage = ({
   return wrap(
     <>
       {embedded ? (
-        <div className="max-w-7xl mx-auto mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto mb-3 sm:mb-4 flex flex-wrap items-center justify-between gap-2 sm:gap-3 px-1 sm:px-0">
           <button
             type="button"
             onClick={() => navigate("/#statistics")}
-            className="text-sm text-[#337ab7] hover:text-[#009ddc] underline cursor-pointer"
+            className="text-xs sm:text-sm text-[#337ab7] hover:text-[#009ddc] underline cursor-pointer"
             style={{ fontFamily: "myFont, sans-serif" }}
           >
             {language === "EN" ? "← Back to sections" : "← სექციებზე დაბრუნება"}
           </button>
           <h3
-            className="text-base font-semibold text-[#009ddc]"
+            className="text-sm sm:text-base md:text-lg font-semibold text-[#009ddc] text-right"
             style={{ fontFamily: "myFont, sans-serif" }}
           >
             {sectionDisplayName(meta, language)}
@@ -141,7 +160,7 @@ const StatisticsSectionPage = ({
             {groupEntries.map(([groupName, items]) => (
               <section key={groupName}>
                 <h2
-                  className="text-lg font-bold mb-3"
+                  className="text-base sm:text-lg md:text-xl font-bold mb-2 sm:mb-3"
                   style={{
                     color: "#35bb40",
                     fontFamily: "myFont, sans-serif",
@@ -157,7 +176,7 @@ const StatisticsSectionPage = ({
                     return (
                       <li key={dataset.id}>
                         <div
-                          className="flex flex-wrap items-baseline justify-between gap-2 py-2 px-2 rounded cursor-pointer"
+                          className="flex flex-wrap items-baseline justify-between gap-1.5 sm:gap-2 py-1.5 px-1.5 sm:py-2 sm:px-2 rounded cursor-pointer"
                           onClick={() => {
                             if (isSelected) {
                               clearDataset();
@@ -184,9 +203,9 @@ const StatisticsSectionPage = ({
                                 "transparent";
                           }}
                         >
-                          <div className="flex-1 min-w-[200px] text-sm">
+                          <div className="flex-1 min-w-0 w-full text-xs sm:text-sm leading-snug sm:leading-normal">
                             <span
-                              className={`text-left transition-colors hover:text-[#e4535f] ${
+                              className={`block text-left wrap-break-word transition-colors hover:text-[#e4535f] ${
                                 isSelected
                                   ? "text-[#e4535f] font-semibold"
                                   : "text-[#009ddc]"
@@ -194,12 +213,20 @@ const StatisticsSectionPage = ({
                               style={{ fontFamily: "myFont, sans-serif" }}
                             >
                               {label}
-                              {dataset.unit ? ` (${dataset.unit})` : ""}
+                              {dataset.unit ? (
+                                <span className="text-[0.92em] opacity-90">
+                                  {" "}
+                                  ({dataset.unit})
+                                </span>
+                              ) : null}
                             </span>
                           </div>
                         </div>
                         {isSelected ? (
-                          <div className="my-3">
+                          <div
+                            ref={chartAnchorRef}
+                            className="my-3 statistics-chart-anchor"
+                          >
                             {chartLoading && !chartModel ? (
                               <p
                                 className="text-gray-500 text-sm"
@@ -241,6 +268,7 @@ const StatisticsSectionPage = ({
                                 <ChartSidebar
                                   sectionId={sectionId}
                                   groupName={groupName}
+                                  datasetId={dataset.id}
                                   pxwebUrl={dataset.pxwebUrl}
                                   chartType={chartType}
                                   onChartTypeChange={setChartType}
@@ -258,6 +286,7 @@ const StatisticsSectionPage = ({
                                       chartModel.seriesKeys,
                                       chartModel.yearLabel,
                                       chartTitle,
+                                      chartModel.seriesExportLabels,
                                     );
                                   }}
                                 />

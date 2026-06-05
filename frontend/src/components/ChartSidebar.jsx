@@ -49,6 +49,7 @@ const BarChartIcon = () => (
  * @param {{
  *   sectionId: string;
  *   groupName: string;
+ *   datasetId?: string;
  *   pxwebUrl?: string;
  *   chartType: "line" | "bar";
  *   onChartTypeChange: (type: "line" | "bar") => void;
@@ -61,6 +62,7 @@ const BarChartIcon = () => (
 const ChartSidebar = ({
   sectionId,
   groupName,
+  datasetId,
   pxwebUrl,
   chartType,
   onChartTypeChange,
@@ -133,7 +135,11 @@ const ChartSidebar = ({
         </div>
       ) : null}
     </div>
-    <GroupChartImage sectionId={sectionId} groupName={groupName} />
+    <GroupChartImage
+      sectionId={sectionId}
+      groupName={groupName}
+      datasetId={datasetId}
+    />
   </div>
 );
 

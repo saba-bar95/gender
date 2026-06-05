@@ -103,9 +103,16 @@ const escapeHtml = (value) =>
  * @param {string[]} seriesKeys
  * @param {string} yearLabel
  * @param {string} filename
+ * @param {string[]} [seriesHeaders]
  */
-export function downloadChartXls(chartData, seriesKeys, yearLabel, filename) {
-  const headers = [yearLabel, ...seriesKeys];
+export function downloadChartXls(
+  chartData,
+  seriesKeys,
+  yearLabel,
+  filename,
+  seriesHeaders = seriesKeys,
+) {
+  const headers = [yearLabel, ...seriesHeaders];
   const rows = chartData.map((row) => [
     row.year,
     ...seriesKeys.map((key) => (row[key] ?? "")),
@@ -136,9 +143,16 @@ const escapeCsvCell = (value) => {
  * @param {string[]} seriesKeys
  * @param {string} yearLabel
  * @param {string} filename
+ * @param {string[]} [seriesHeaders]
  */
-export function downloadChartCsv(chartData, seriesKeys, yearLabel, filename) {
-  const headers = [yearLabel, ...seriesKeys];
+export function downloadChartCsv(
+  chartData,
+  seriesKeys,
+  yearLabel,
+  filename,
+  seriesHeaders = seriesKeys,
+) {
+  const headers = [yearLabel, ...seriesHeaders];
   const lines = [
     headers.map(escapeCsvCell).join(","),
     ...chartData.map((row) =>

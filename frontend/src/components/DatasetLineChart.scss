@@ -112,9 +112,9 @@
   border: 1px solid #d9edf7;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.97);
-  padding: 8px 10px;
-  min-width: 140px;
-  max-width: min(220px, calc(100% - 16px));
+  padding: 8px 12px;
+  min-width: 160px;
+  max-width: min(280px, calc(100% - 16px));
   font-family: "myFont", sans-serif;
 }
 
@@ -257,8 +257,9 @@
   }
 
   .dataset-chart-wrapper .custom-tooltip {
-    min-width: 150px;
-    padding: 6px 8px;
+    min-width: 170px;
+    max-width: min(260px, calc(100% - 16px));
+    padding: 6px 10px;
   }
 
   .dataset-chart-wrapper .tooltip-label {

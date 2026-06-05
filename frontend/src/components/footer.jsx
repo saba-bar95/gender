@@ -46,9 +46,9 @@ const Footer = ({ language = "GE" }) => {
           ↑
         </button>
       )}
-      <footer className="w-full text-center text-sm text-gray-700 py-6 mt-auto app-footer">
-        <div className="max-w-4xl mx-auto px-4">
-          <p className="text-sm text-gray-600 leading-5 bpg_mrgvlovani_caps footer-text">
+      <footer className="w-full text-center text-gray-700 py-4 sm:py-5 md:py-6 mt-auto app-footer">
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-6">
+          <p className="text-[11px] sm:text-sm md:text-base text-gray-600 leading-snug sm:leading-5 md:leading-6 bpg_mrgvlovani_caps footer-text">
             {language === "GE"
               ? `© ${year} ყველა უფლება დაცულია.`
               : `© ${year} All rights reserved.`}
@@ -61,7 +61,7 @@ const Footer = ({ language = "GE" }) => {
               href="https://www.geostat.ge/ka/page/monacemta-gamoyenebis-pirobebi"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
+              className="text-blue-600 hover:underline text-[11px] sm:text-sm md:text-base"
             >
               {language === "GE"
                 ? "მონაცემთა გამოყენების პირობები"

@@ -35,8 +35,8 @@ const SERIES_MARKER_ICONS = {
 /** @param {string} key */
 const getSeriesMarkerType = (key) => {
   const s = key.toLowerCase();
-  if (/ქალი|female|woman|women|girl/.test(s)) return "female";
-  if (/კაც|male|\bman\b|\bmen\b|boy/.test(s)) return "male";
+  if (/ქალი|გოგო|female|woman|women|girl/.test(s)) return "female";
+  if (/კაც|ბიჭი|male|\bman\b|\bmen\b|boy/.test(s)) return "male";
   if (/total|სულ|ჯამ/.test(s)) return "total";
   return null;
 };
@@ -47,10 +47,11 @@ const getSeriesMarkerIcon = (key) => {
   return type ? SERIES_MARKER_ICONS[type] : null;
 };
 
-/** @param {string} key @param {number} [fallbackIndex] */
-const getSeriesColor = (key, fallbackIndex = 0) => {
+/** @param {string} key @param {number} [fallbackIndex] @param {number} [seriesCount] */
+const getSeriesColor = (key, fallbackIndex = 0, seriesCount = 1) => {
   const type = getSeriesMarkerType(key);
   if (type && SERIES_COLORS_BY_TYPE[type]) return SERIES_COLORS_BY_TYPE[type];
+  if (seriesCount === 1) return SERIES_COLORS_BY_TYPE.female;
   return SERIES_FALLBACK_COLORS[fallbackIndex % SERIES_FALLBACK_COLORS.length];
 };
 
@@ -108,30 +109,26 @@ const niceStep = (roughStep) => {
 };
 
 /**
- * Rounded Y scale that hugs the data (e.g. 1000, 2000, 5000) with integer ticks only.
- * @param {number} dataMin
+ * Y-axis scale from 0 upward with nice integer ticks.
  * @param {number} dataMax
  * @param {number} [targetTickCount]
  */
-const computeYAxisScale = (dataMin, dataMax, targetTickCount = 5) => {
-  if (dataMin === dataMax) {
-    const pad = dataMin === 0 ? 1 : Math.max(Math.abs(dataMin) * 0.1, 1);
-    return computeYAxisScale(dataMin - pad, dataMax + pad, targetTickCount);
+const computeYAxisScale = (dataMax, targetTickCount = 5) => {
+  const maxVal = Math.max(dataMax, 0);
+  if (maxVal === 0) {
+    return { min: 0, max: 1, ticks: [0, 1], step: 1 };
   }
 
-  const rawRange = dataMax - dataMin;
-  const step = niceStep(rawRange / Math.max(targetTickCount - 1, 1));
-  let scaleMin = Math.floor(dataMin / step) * step;
-  let scaleMax = Math.ceil(dataMax / step) * step;
-
-  if (scaleMax <= scaleMin) scaleMax = scaleMin + step;
+  const step = niceStep(maxVal / Math.max(targetTickCount - 1, 1));
+  let scaleMax = Math.ceil(maxVal / step) * step;
+  if (scaleMax <= 0) scaleMax = step;
 
   const ticks = [];
-  for (let v = scaleMin; v <= scaleMax + step * 0.001; v += step) {
+  for (let v = 0; v <= scaleMax + step * 0.001; v += step) {
     ticks.push(Math.round(v * 1e6) / 1e6);
   }
 
-  return { min: scaleMin, max: scaleMax, ticks, step };
+  return { min: 0, max: scaleMax, ticks, step };
 };
 
 const ChartHeader = ({
@@ -249,6 +246,7 @@ const ChartHeader = ({
  *     title: string;
  *     unit: string;
  *     seriesKeys: string[];
+ *     seriesExportLabels?: string[];
  *     chartData: Record<string, number | null>[];
  *     yearLabel: string;
  *   };
@@ -263,7 +261,9 @@ const DatasetLineChart = ({
   displayTitle,
   chartType = "line",
 }) => {
-  const { title, unit, seriesKeys, chartData, yearLabel } = chartModel;
+  const { title, unit, seriesKeys, seriesExportLabels, chartData, yearLabel } =
+    chartModel;
+  const exportLabels = seriesExportLabels ?? seriesKeys;
   const pointsWithYear = chartData.filter(
     (row) => typeof row.year === "number",
   );
@@ -292,7 +292,13 @@ const DatasetLineChart = ({
   };
 
   const handleDownloadXls = () => {
-    downloadChartXls(displayChartData, seriesKeys, yearLabel, chartTitle);
+    downloadChartXls(
+      displayChartData,
+      seriesKeys,
+      yearLabel,
+      chartTitle,
+      exportLabels,
+    );
   };
 
   if (!displayChartData.length || !seriesKeys.length) {
@@ -325,9 +331,8 @@ const DatasetLineChart = ({
     .flatMap((key) => displayChartData.map((row) => toNumber(row[key])))
     .filter((v) => v !== null);
 
-  const minValue = visibleValues.length ? Math.min(...visibleValues) : 0;
   const maxValue = visibleValues.length ? Math.max(...visibleValues) : 1;
-  const yAxisScale = computeYAxisScale(minValue, maxValue, 5);
+  const yAxisScale = computeYAxisScale(maxValue, 5);
   const yScaleMin = yAxisScale.min;
   const yScaleMax = yAxisScale.max;
   const valueRange = yScaleMax - yScaleMin || 1;
@@ -504,7 +509,11 @@ const DatasetLineChart = ({
 
           {chartType === "bar"
             ? visibleSeriesKeys.map((key, seriesIndex) => {
-                const color = getSeriesColor(key, seriesIndex);
+                const color = getSeriesColor(
+                  key,
+                  seriesIndex,
+                  visibleSeriesKeys.length,
+                );
                 return (
                   <g key={key}>
                     {displayChartData.map((row, pointIndex) => {
@@ -536,7 +545,11 @@ const DatasetLineChart = ({
                 );
               })
             : visibleSeriesKeys.map((key, index) => {
-                const color = getSeriesColor(key, index);
+                const color = getSeriesColor(
+                  key,
+                  index,
+                  visibleSeriesKeys.length,
+                );
                 const points = displayChartData.map((row) => {
                   const yValue = toNumber(row[key]);
                   return {
@@ -660,7 +673,11 @@ const DatasetLineChart = ({
                         <span
                           className="before-span"
                           style={{
-                            backgroundColor: getSeriesColor(key, index),
+                            backgroundColor: getSeriesColor(
+                              key,
+                              index,
+                              visibleSeriesKeys.length,
+                            ),
                           }}
                         />
                       )}
@@ -697,7 +714,11 @@ const DatasetLineChart = ({
                 <span
                   className="recharts-legend-item-icon"
                   style={{
-                    backgroundColor: getSeriesColor(key, index),
+                    backgroundColor: getSeriesColor(
+                      key,
+                      index,
+                      seriesKeys.length,
+                    ),
                   }}
                 />
               )}

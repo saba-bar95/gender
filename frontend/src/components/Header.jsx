@@ -108,39 +108,25 @@ const Header = ({
         }}
       >
         {/* TOP BAR */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            maxWidth: "1340px",
-            margin: "0 auto",
-            width: "100%",
-          }}
-        >
-          {/* COL 1 (col-sm-8): logo2 + genderText + SDG */}
-          <div
-            style={{
-              flex: "0 0 66.66%",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <Link to="/">
-              <img src={logo2} alt="LOGO" style={{ verticalAlign: "middle" }} />
+        <div className="flex items-center max-w-[1340px] mx-auto w-full px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-0">
+          {/* COL 1: logo2 + genderText + SDG */}
+          <div className="flex items-center min-w-0 flex-1 md:flex-[0_0_66.66%] gap-1 sm:gap-2">
+            <Link to="/" className="shrink-0">
+              <img
+                src={logo2}
+                alt="LOGO"
+                className="h-9 sm:h-11 md:h-auto max-h-12 md:max-h-none w-auto align-middle"
+              />
             </Link>
 
             <div
-              style={{
-                paddingLeft: "10px",
-                color: "#e4535f",
-                fontSize: "24px",
-                fontFamily: "bpg-nino, sans-serif",
-              }}
+              className="min-w-0 pl-1 sm:pl-2 md:pl-[10px] text-[#e4535f] text-[11px] sm:text-sm md:text-lg lg:text-2xl leading-tight"
+              style={{ fontFamily: "bpg-nino, sans-serif" }}
             >
               {txt.portalLine1}
             </div>
 
-            <div style={{ flex: "0 0 16.66%", paddingLeft: "12px" }}>
+            <div className="hidden md:block shrink-0 pl-2 lg:pl-3 max-w-[72px] lg:max-w-none">
               <a
                 href="#sdg"
                 title="მდგრადი განვითარების მიზნები"
@@ -154,49 +140,25 @@ const Header = ({
                   alt="SDG"
                   onMouseEnter={() => setSdgHover(true)}
                   onMouseLeave={() => setSdgHover(false)}
-                  style={{ width: "46%", verticalAlign: "middle" }}
+                  className="w-full max-w-[56px] lg:max-w-[72px] align-middle"
                 />
               </a>
             </div>
           </div>
 
-          {/* COL 2 (col-sm-2): Geostat logo + border-right */}
-          <div
-            style={{
-              flex: "0 0 16.66%",
-              borderRight: "1px solid #009ddc",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              paddingRight: "12px",
-            }}
-          >
+          {/* COL 2: Geostat logo */}
+          <div className="hidden sm:flex shrink-0 md:flex-[0_0_16.66%] border-r border-[#009ddc] items-center justify-end pr-2 md:pr-3">
             <a href="http://geostat.ge" target="_blank" rel="noreferrer">
               <img
                 src={language === "GE" ? sakstatLogoGe : sakstatLogoEn}
                 alt="Geostat"
-                style={{
-                  height: "52px",
-                  width: "auto",
-                  display: "block",
-                  marginLeft: "auto",
-                  verticalAlign: "middle",
-                }}
+                className="h-8 sm:h-10 md:h-[52px] w-auto block ml-auto align-middle"
               />
             </a>
           </div>
 
-          {/* COL 3 (col-sm-2): UN Women logo + lang + hamburger */}
-          <div
-            style={{
-              flex: "0 0 16.66%",
-              paddingRight: 0,
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              paddingLeft: "12px",
-            }}
-          >
+          {/* COL 3: UN Women logo + lang + hamburger */}
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3 md:flex-[0_0_16.66%] md:pl-3 ml-auto md:ml-0">
             <a
               href="https://www.unwomen.org/en"
               target="_blank"
@@ -440,7 +402,8 @@ const Header = ({
           className="hidden md:block text-white"
           style={{ background: "#009ddc" }}
         >
-          <div className="flex justify-center items-stretch gap-10 text-[16px]">
+          <div className="max-w-[1340px] mx-auto w-full px-2 md:px-3 lg:px-4">
+            <div className="flex flex-wrap xl:flex-nowrap justify-center items-stretch gap-x-1.5 md:gap-x-2 lg:gap-x-4 xl:gap-x-8 2xl:gap-x-10 text-[10px] md:text-[11px] lg:text-sm xl:text-[15px] 2xl:text-[16px] leading-tight tracking-tight">
             {txt.nav.map((item, idx) =>
               idx === 0 ? (
                 <div
@@ -449,10 +412,10 @@ const Header = ({
                   onMouseEnter={() => setStatsOpen(true)}
                   onMouseLeave={() => setStatsOpen(false)}
                 >
-                  <button className="flex items-center gap-1 px-3 py-[20px] transition-colors duration-200 hover:bg-white hover:text-gray-900 cursor-pointer">
+                  <button className="flex items-center gap-0.5 md:gap-1 px-1.5 md:px-2 lg:px-2.5 xl:px-3 py-2.5 md:py-3 lg:py-4 xl:py-5 transition-colors duration-200 hover:bg-white hover:text-gray-900 cursor-pointer text-center">
                     {item}
                     <svg
-                      className={`w-3 h-3 transition-transform ${statsOpen ? "rotate-180" : ""}`}
+                      className={`w-2.5 h-2.5 md:w-3 md:h-3 shrink-0 transition-transform ${statsOpen ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -467,7 +430,7 @@ const Header = ({
                   </button>
                   {statsOpen && (
                     <div
-                      className="absolute top-full left-0 bg-white text-gray-800 shadow-xl rounded-b-lg z-50 min-w-[280px] py-1"
+                      className="absolute top-full left-0 bg-white text-gray-800 shadow-xl rounded-b-lg z-50 min-w-[220px] md:min-w-[250px] lg:min-w-[280px] py-1"
                       style={{ border: "1px solid #e5e7eb" }}
                     >
                       {sections.map((s) => (
@@ -475,7 +438,7 @@ const Header = ({
                           key={s.route}
                           to={s.route}
                           onClick={() => setStatsOpen(false)}
-                          className="block px-4 py-2 text-[14px] hover:bg-blue-50 hover:text-blue-700"
+                          className="block px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm lg:text-[14px] hover:bg-blue-50 hover:text-blue-700"
                           style={{
                             fontFamily: "bpg-nino, sans-serif",
                             fontFeatureSettings: '"case" on',
@@ -516,12 +479,13 @@ const Header = ({
                       setInfographicOpen(true);
                     }
                   }}
-                  className="flex items-center px-3 py-[20px] transition-colors duration-200 hover:bg-white hover:text-gray-900"
+                  className="flex items-center px-1.5 md:px-2 lg:px-2.5 xl:px-3 py-2.5 md:py-3 lg:py-4 xl:py-5 transition-colors duration-200 hover:bg-white hover:text-gray-900 text-center"
                 >
                   {item}
                 </a>
               ),
             )}
+            </div>
           </div>
         </nav>
       </header>
