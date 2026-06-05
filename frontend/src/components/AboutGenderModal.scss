@@ -1,0 +1,31 @@
+.about-gender-modal {
+  font-family: myFont, sans-serif;
+}
+
+.about-body {
+  h1,
+  h3 {
+    color: #005c97;
+    font-size: clamp(16px, 4vw, 20px);
+    font-weight: 700;
+    margin: clamp(14px, 3.5vw, 20px) 0 clamp(6px, 2vw, 8px);
+    font-family: myFont, sans-serif;
+    line-height: 1.35;
+  }
+
+  h1:first-child,
+  h3:first-child {
+    margin-top: 0;
+  }
+
+  p {
+    font-size: clamp(12px, 3.2vw, 13px);
+    color: #37496d;
+    line-height: 1.7;
+    margin-bottom: clamp(10px, 2.5vw, 12px);
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
