@@ -1,15 +1,26 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { GLOSSARY_KA_ITEMS } from "../data/glossaryKa";
+import { GLOSSARY_EN_ITEMS } from "../data/glossaryEn";
+import {
+  escapeHtml,
+  glossaryEntryHtml,
+  splitGlossaryEntry,
+} from "../utils/glossaryEntry";
+import "./modalShared.scss";
 
-const modalStyles = `
-  @keyframes glossaryFadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  @keyframes glossarySlideUp {
-    from { opacity: 0; transform: translateY(40px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0)   scale(1);    }
-  }
-`;
+/**
+ * @param {string} text
+ */
+function GlossaryEntryText({ text }) {
+  const { firstWord, rest } = splitGlossaryEntry(text);
+
+  return (
+    <>
+      <strong>{firstWord}</strong>
+      {rest}
+    </>
+  );
+}
 
 const GlossaryModal = ({ language, onClose }) => {
   const [items, setItems] = useState([]);
@@ -17,28 +28,14 @@ const GlossaryModal = ({ language, onClose }) => {
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
 
-  const lang = language === "EN" ? "en" : "ka";
+  const isGeorgian = language !== "EN";
 
   useEffect(() => {
-    setLoading(true);
+    setSearch("");
+    setItems(isGeorgian ? GLOSSARY_KA_ITEMS : GLOSSARY_EN_ITEMS);
     setError(null);
-    fetch(`${import.meta.env.VITE_API_URL}/api/glossary?lang=${lang}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Server error");
-        return res.json();
-      })
-      .then((data) => {
-        const sorted = [...data].sort((a, b) =>
-          (a.text || "").localeCompare(b.text || "", "ka", { sensitivity: "base" })
-        );
-        setItems(sorted);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [lang]);
+    setLoading(false);
+  }, [isGeorgian]);
 
   const handleBackdrop = useCallback(
     (e) => {
@@ -59,144 +56,149 @@ const GlossaryModal = ({ language, onClose }) => {
     item.text?.toLowerCase().includes(search.toLowerCase()),
   );
 
+  const handlePrint = () => {
+    const title = language === "EN" ? "Glossary" : "გლოსარიუმი";
+    const entries = filtered
+      .map(
+        (item) =>
+          `<div class="entry">${glossaryEntryHtml(item.text || "")}</div>`,
+      )
+      .join("");
+
+    const printHtml = `<!DOCTYPE html>
+<html lang="${isGeorgian ? "ka" : "en"}">
+<head>
+  <meta charset="utf-8"/>
+  <title>${escapeHtml(title)}</title>
+  <style>
+    body { font-family: FiraGO, sans-serif; color: #37496d; padding: 24px; }
+    h1 { color: #005c97; font-size: 22px; margin-bottom: 24px; }
+    .entry { margin-bottom: 16px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+    .entry strong { color: #005c97; }
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+  <h1>${escapeHtml(title)}</h1>
+  ${entries}
+  <script>
+    window.addEventListener("load", function () {
+      window.focus();
+      window.print();
+    });
+  <\/script>
+</body>
+</html>`;
+
+    const triggerPrint = (targetWindow) => {
+      targetWindow.document.open();
+      targetWindow.document.write(printHtml);
+      targetWindow.document.close();
+    };
+
+    const printWindow = window.open("about:blank", "_blank");
+    if (printWindow) {
+      triggerPrint(printWindow);
+      return;
+    }
+
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute(
+      "style",
+      "position:fixed;right:0;bottom:0;width:0;height:0;border:0;",
+    );
+    document.body.appendChild(iframe);
+    const iframeWindow = iframe.contentWindow;
+    if (!iframeWindow) {
+      iframe.remove();
+      return;
+    }
+    triggerPrint(iframeWindow);
+    iframeWindow.addEventListener("afterprint", () => iframe.remove());
+    setTimeout(() => iframe.remove(), 60_000);
+  };
+
   return (
-    <>
-      <style>{modalStyles}</style>
-      <div
-        onClick={handleBackdrop}
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(0,0,0,0.45)",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "16px",
-          animation: "glossaryFadeIn 0.2s ease",
-        }}
-      >
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: "16px",
-          width: "100%",
-          maxWidth: "960px",
-          maxHeight: "80vh",
-          display: "flex",
-          flexDirection: "column",
-          boxShadow: "0 8px 40px rgba(0,0,0,0.18)",
-          fontFamily: "FiraGO, sans-serif",
-          overflow: "hidden",
-          animation: "glossarySlideUp 0.25s cubic-bezier(0.34,1.56,0.64,1)",
-        }}
-      >
-        {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "20px 24px 16px",
-            background: "#005c97",
-          }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              fontSize: "20px",
-              fontWeight: "700",
-              color: "#fff",
-              fontFeatureSettings: '"case" on',
-            }}
-          >
+    <div
+      onClick={handleBackdrop}
+      className="modal-overlay"
+      style={{ fontFamily: "FiraGO, sans-serif" }}
+    >
+      <div className="modal-dialog">
+        <div className="modal-header">
+          <h2 className="modal-title">
             {language === "EN" ? "Glossary" : "გლოსარიუმი"}
           </h2>
           <button
+            type="button"
             onClick={onClose}
-            aria-label="Close"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "#fff",
-              fontSize: "22px",
-              lineHeight: 1,
-              padding: "4px 8px",
-            }}
+            className="modal-close-btn"
+            aria-label={language === "EN" ? "Close" : "დახურვა"}
           >
-            ✕
+            ×
           </button>
         </div>
 
-        {/* Search */}
-        <div style={{ padding: "12px 24px", borderBottom: "1px solid #e5e9f0" }}>
+        <div className="modal-section">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={language === "EN" ? "Search…" : "ძიება…"}
-            style={{
-              width: "100%",
-              padding: "8px 14px",
-              borderRadius: "8px",
-              border: "1px solid #c5cfe0",
-              fontSize: "14px",
-              fontFamily: "FiraGO, sans-serif",
-              outline: "none",
-              color: "#37496d",
-              boxSizing: "border-box",
-            }}
+            className="modal-input"
+            style={{ fontFamily: "FiraGO, sans-serif" }}
           />
         </div>
 
-        {/* Body */}
-        <div style={{ overflowY: "auto", padding: "8px 0" }}>
+        <div className="modal-body modal-body--list">
           {loading && (
-            <p style={{ textAlign: "center", padding: "32px", color: "#37496d" }}>
+            <p className="modal-message" style={{ color: "#37496d" }}>
               {language === "EN" ? "Loading…" : "იტვირთება…"}
             </p>
           )}
           {error && (
-            <p style={{ textAlign: "center", padding: "32px", color: "#c0392b" }}>
-              {error}
-            </p>
+            <p className="modal-message modal-message--error">{error}</p>
           )}
           {!loading && !error && filtered.length === 0 && (
-            <p style={{ textAlign: "center", padding: "32px", color: "#8ea4c8" }}>
+            <p className="modal-message modal-message--muted">
               {language === "EN" ? "No results." : "შედეგი არ მოიძებნა."}
             </p>
           )}
           {!loading &&
             !error &&
             filtered.map((item) => (
-              <div
-                key={item.ID}
-                style={{
-                  padding: "12px 24px",
-                  borderBottom: "1px solid #f0f3f8",
-                  fontSize: "14px",
-                  color: "#37496d",
-                  lineHeight: "1.6",
-                }}
-              >
-                {(() => {
-                  const text = item.text || "";
-                  const dashIdx = text.search(/\s[–-]\s/);
-                  if (dashIdx === -1) return <strong>{text}</strong>;
-                  return (
-                    <>
-                      <strong>{text.slice(0, dashIdx)}</strong>
-                      {text.slice(dashIdx)}
-                    </>
-                  );
-                })()}
+              <div key={item.ID} className="modal-entry">
+                <GlossaryEntryText text={item.text || ""} />
               </div>
             ))}
         </div>
+
+        <div className="modal-footer">
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="modal-btn modal-btn--secondary"
+            style={{ fontFamily: "FiraGO, sans-serif" }}
+          >
+            {language === "EN" ? "Print" : "ბეჭდვა"}
+          </button>
+
+          <hr className="modal-divider" />
+
+          <div className="modal-footer-actions">
+            <button
+              type="button"
+              onClick={onClose}
+              className="modal-btn modal-btn--primary"
+              aria-label={language === "EN" ? "Close" : "დახურვა"}
+              style={{ fontFamily: "FiraGO, sans-serif" }}
+            >
+              {language === "EN" ? "Close" : "დახურვა"}
+            </button>
+          </div>
+        </div>
       </div>
-      </div>
-    </>
+    </div>
   );
 };
 
