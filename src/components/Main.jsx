@@ -185,15 +185,15 @@ const Publications = ({ language }) => {
           "National Study on Violence against Women in Georgia 2022-Presentation",
           "TIME USE SURVEY IN GEORGIA 2020-2021",
           "User Satisfaction with Gender Statistics, 2021",
+          "Women and Men in Georgia, 2021",
           "Women and Men in Georgia, 2020",
           "Women and Men in Georgia, 2019",
-          "Women and Men in Georgia, 2021",
+          "Women and Men in Georgia, 2018",
           "Women and Men in Georgia, 2017",
           "National Study on Violence Against Women in Georgia 2017",
-          "Women and Men in Georgia, 2018",
           "Pilot Survey on Measuring Asset Ownership and Entrepreneurship from a Gender Perspective in Georgia 2015",
-          "Women and Men in Georgia, 2013",
           "Women and Men in Georgia, 2015",
+          "Women and Men in Georgia, 2013",
           "Women and Men in Georgia, 2011",
           "Gender in Trade Assessment in Georgia",
         ]
@@ -206,15 +206,15 @@ const Publications = ({ language }) => {
           "ქალთა მიმართ ძალადობის ეროვნული კვლევა საქართველოში 2022-პრეზენტაცია",
           "დროის გამოყენების გამოკვლევა საქართველოში 2020-2021",
           "მომხმარებელთა კმაყოფილება გენდერული სტატისტიკით, 2021 წელი",
+          "ქალი და კაცი საქართველოში, 2021 წელი",
           "ქალი და კაცი საქართველოში, 2020 წელი",
           "ქალი და კაცი საქართველოში, 2019 წელი",
-          "ქალი და კაცი საქართველოში, 2021 წელი",
+          "ქალი და კაცი საქართველოში, 2018 წელი",
           "ქალი და კაცი საქართველოში, 2017 წელი",
           "ქალთა მიმართ ძალადობის ეროვნული კვლევა საქართველოში 2017",
-          "ქალი და კაცი საქართველოში, 2018 წელი",
           "პილოტური კვლევა გენდერულად დიფერენცირებული მონაცემების შეგროვებაზე აქტივების ფლობასა და მეწარმეობაზე საქართველოში 2015",
-          "ქალი და კაცი საქართველოში, 2013 წელი",
           "ქალი და კაცი საქართველოში, 2015 წელი",
+          "ქალი და კაცი საქართველოში, 2013 წელი",
           "ქალი და კაცი საქართველოში, 2011 წელი",
           "ვაჭრობასთან დაკავშირებული გენდერული სტატისტიკის შეფასება საქართველოში",
         ];
@@ -274,48 +274,54 @@ const Publications = ({ language }) => {
           } else if (idx === 8) {
             link =
               language === "EN"
+                ? "https://www.geostat.ge/media/41855/WOMEN-AND-MEN-IN-GEORGIAN_-2021.pdf"
+                : "https://www.geostat.ge/media/41854/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98-%E1%83%A1%E1%83%90%E1%83%A5%E1%83%90%E1%83%A0%E1%83%97%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%A8%E1%83%98_2021.pdf";
+          } else if (idx === 9) {
+            link =
+              language === "EN"
                 ? "https://www.geostat.ge/media/38263/Women-and-Men-in-georgia%2C-2020.pdf"
                 : "https://www.geostat.ge/media/38262/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98%2C-2020.pdf";
-          } else if (idx === 9) {
+          } else if (idx === 10) {
             link =
               language === "EN"
                 ? "https://www.geostat.ge/media/27545/W%26M-GEO_2019.pdf"
                 : "https://www.geostat.ge/media/27546/W%26M-ENG_2019.pdf";
-          } else if (idx === 10) {
-            link =
-              language === "EN"
-                ? "https://www.geostat.ge/media/41855/WOMEN-AND-MEN-IN-GEORGIAN_-2021.pdf"
-                : "https://www.geostat.ge/media/41854/%E1%83%A5%E1%83%90%E1%83%9A%E1%83%98-%E1%83%93%E1%83%90-%E1%83%99%E1%83%90%E1%83%AA%E1%83%98-%E1%83%A1%E1%83%90%E1%83%A5%E1%83%90%E1%83%A0%E1%83%97%E1%83%95%E1%83%94%E1%83%9A%E1%83%9D%E1%83%A8%E1%83%98_2021.pdf";
           } else if (idx === 11) {
-            link =
-              language === "EN"
-                ? "https://www.geostat.ge/media/21016/W%26M-in-ENG_2017.pdf"
-                : "https://www.geostat.ge/media/27454/W%26M-in-GEO_2017.pdf";
-          } else if (idx === 12) {
-            link =
-              language === "EN"
-                ? "https://gender.geostat.ge/gender/img/publicationspdf_en/National%20VAW%20Study%20Report%20ENG.pdf#view=fit"
-                : "https://www.geostat.ge/media/27454/W%26M-in-GEO_2017.pdf";
-          } else if (idx === 13) {
             link =
               language === "EN"
                 ? "https://www.geostat.ge/media/21015/W%26M-ENG-2018.pdf"
                 : "https://www.geostat.ge/media/23369/WM_ge-2018.pdf";
-          } else if (idx === 14) {
-            link =
-              language === "GE"
-                ? "https://gender.geostat.ge/gender/img/publicationspdf_en/EDGE-Report-ENG-Final.pdf#view=fit"
-                : "https://gender.geostat.ge/gender/img/publicationspdf/EDGE-Report-GEO-Final.pdf#view=fit";
-          } else if (idx === 15) {
+          } else if (idx === 12) {
             link =
               language === "EN"
-                ? "https://www.geostat.ge/media/21018/women-and-men-2013.pdf"
-                : "https://www.geostat.ge/media/13600/qali-da-kaci-2013.pdf";
-          } else if (idx === 16) {
+                ? "https://www.geostat.ge/media/21016/W%26M-in-ENG_2017.pdf"
+                : "https://www.geostat.ge/media/27454/W%26M-in-GEO_2017.pdf";
+          } else if (idx === 13) {
+            link =
+              language === "EN"
+                ? "/files/publications_en/National%20VAW%20Study%20Report%20ENG.pdf"
+                : "https://www.geostat.ge/media/27454/W%26M-in-GEO_2017.pdf";
+          } else if (idx === 14) {
+            link =
+              language === "EN"
+                ? new URL(
+                    "../assets/img/publicationspdf_en/EDGE-Report-ENG-Final.pdf",
+                    import.meta.url,
+                  ).href
+                : new URL(
+                    "../assets/img/publicationspdf/EDGE-Report-GEO-Final.pdf",
+                    import.meta.url,
+                  ).href;
+          } else if (idx === 15) {
             link =
               language === "EN"
                 ? "https://www.geostat.ge/media/21017/Women-and-Men_2015.pdf"
                 : "https://www.geostat.ge/media/13637/Qali-da-kaci_2015.pdf";
+          } else if (idx === 16) {
+            link =
+              language === "EN"
+                ? "https://www.geostat.ge/media/21018/women-and-men-2013.pdf"
+                : "https://www.geostat.ge/media/13600/qali-da-kaci-2013.pdf";
           } else if (idx === 17) {
             link =
               language === "EN"
@@ -323,9 +329,7 @@ const Publications = ({ language }) => {
                 : "https://www.geostat.ge/media/13581/qali-da-kaci.pdf";
           } else if (idx === 18) {
             link =
-              language === "EN"
-                ? "https://gender.geostat.ge/gender/doc/GenderTradeAssessmentInGeorgia_en.pdf"
-                : "https://gender.geostat.ge/gender/doc/GenderTradeAssessmentInGeorgia_en.pdf";
+              "/files/publications_en/GenderTradeAssessmentInGeorgia_en.pdf";
           }
           return (
             <div
