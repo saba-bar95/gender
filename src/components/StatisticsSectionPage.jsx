@@ -20,7 +20,17 @@ const datasetDisplayName = (dataset, language) =>
   language === "EN" ? dataset.englishName || dataset.name : dataset.name;
 
 const sectionDisplayName = (meta, language) =>
-  language === "EN" ? meta.englishName || meta.name : meta.name;
+  language === "EN" ? meta.en || meta.ge : meta.ge;
+
+/**
+ * The datasets API returns group names only in Georgian (even with lang=en).
+ * Each group name matches a section's Georgian name, so translate via sections.
+ */
+const groupDisplayName = (groupName, sections, language) => {
+  if (language !== "EN") return groupName;
+  const match = sections.find((s) => s.ge === groupName);
+  return match?.en || groupName;
+};
 
 const StatisticsSectionPage = ({
   language = "GE",
@@ -137,12 +147,12 @@ const StatisticsSectionPage = ({
           >
             {language === "EN" ? "← Back to sections" : "← სექციებზე დაბრუნება"}
           </button>
-          <h3
+          {/* <h3
             className="text-sm sm:text-base md:text-lg font-semibold text-[#009ddc] text-right"
             style={{ fontFamily: "myFont, sans-serif" }}
           >
             {sectionDisplayName(meta, language)}
-          </h3>
+          </h3> */}
         </div>
       ) : null}
       {panel(
@@ -166,7 +176,7 @@ const StatisticsSectionPage = ({
                     fontFamily: "myFont, sans-serif",
                   }}
                 >
-                  {groupName}
+                  {groupDisplayName(groupName, sections, language)}
                 </h2>
                 <ul className="space-y-0">
                   {items.map((dataset) => {
